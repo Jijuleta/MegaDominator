@@ -23,6 +23,7 @@ async def on_ready():
     print('------')
 
 @bot.command()
+@commands.has_permissions(administrator=True)
 async def dmbomb(ctx, times: int, user_id: int, message: str):
     user = bot.get_user(user_id)
     if user is None:
@@ -40,6 +41,7 @@ async def dmbomb(ctx, times: int, user_id: int, message: str):
 
 
 @bot.command()
+@commands.has_permissions(administrator=True)
 async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChannel):
     user = ctx.guild.get_member(user_id)
     if user is None:
@@ -54,9 +56,16 @@ async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChanne
     print(f"Moved {user.name} back and forth between {channel.name} and {original_channel.name} {num_moves} times.")
 
 @bot.command()
-async def chngrpc(ctx, rpc_name: str):
-    activity = discord.Activity(name=rpc_name, type=discord.ActivityType.watching)
+@commands.has_permissions(administrator=True)
+async def chngrpc(ctx, *, rpc_name: str):
+    activity = discord.Activity(name=rpc_name, type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
     print(f"Changed Rich Presence to: {rpc_name}")
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def purge(ctx, limit: int):
+    await ctx.channel.purge(limit=limit+1)
+    print(f"{limit} messages have been purged by {ctx.author.mention}.", delete_after=5)
 
 bot.run(API_TOKEN)
