@@ -40,20 +40,6 @@ async def dmbomb(ctx, times: int, user_id: int, *, message: str):
             await ctx.guild.ban(user, reason="User has blocked the bot.")
 
 @bot.command()
-@commands.has_permissions(administrator=True)
-async def chbomb(ctx, times: int, user_id: int, channel: discord.TextChannel, *, message: str):
-    user = bot.get_user(user_id)
-    for i in range(times):
-        try:
-            await channel.send(f"Sending message {i+1} of {times} to {user.mention}: {message}")
-            await user.send(message)
-        except discord.errors.Forbidden:
-            print(f"{user.mention} has blocked the bot and has been banned from the server.")
-            await user.ban(reason="Blocked bot during chbomb command.")
-            break
-    print(f"Finished sending {times} messages to {user.mention}.")
-
-@bot.command()
 async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChannel):
     user = ctx.guild.get_member(user_id)
     if user is None:
@@ -68,7 +54,6 @@ async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChanne
     print(f"Moved {user.name} back and forth between {channel.name} and {original_channel.name} {num_moves} times.")
 
 @bot.command()
-@commands.has_permissions(administrator=True)
 async def chngrpc(ctx, *, rpc_name: str):
     activity = discord.Activity(name=rpc_name, type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
