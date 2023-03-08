@@ -24,7 +24,7 @@ async def on_ready():
 
 @bot.command()
 @commands.has_permissions(administrator=True)
-async def dmbomb(ctx, times: int, user_id: int, message: str):
+async def dmbomb(ctx, times: int, user_id: int, *, message: str):
     user = bot.get_user(user_id)
     if user is None:
         print(f"User with ID {user_id} not found.")
