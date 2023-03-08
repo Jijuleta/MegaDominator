@@ -39,6 +39,20 @@ async def dmbomb(ctx, times: int, user_id: int, message: str):
             # Ban the user from the server
             await ctx.guild.ban(user, reason="User has blocked the bot.")
 
+@bot.command()
+async def chbomb(ctx, times: int, user_id: int, channel: discord.TextChannel, *, message: str):
+    user = bot.get_user(user_id)
+    for i in range(times):
+        try:
+            await channel.send(f"Sending message {i+1} of {times} to {user.mention}: {message}")
+            await user.send(message)
+        except discord.errors.Forbidden:
+            print(f"{user.mention} has blocked the bot and has been banned from the server.")
+            await user.ban(reason="Blocked bot during chbomb command.")
+            break
+    print(f"Finished sending {times} messages to {user.mention}.")
+
+
 
 @bot.command()
 @commands.has_permissions(administrator=True)
