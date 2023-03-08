@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from config import API_TOKEN
+# u have to create config.py and create API_TOKEN variable.
 
 intents = discord.Intents.default()
 intents.members = True
@@ -13,12 +14,16 @@ async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
 
+@bot.command()
+async def dmbomb(ctx, times: int, id: int, mess: str):
+    for i in range(times):
+        user = bot.get_user(id)
+        await user.send(mess)
 
 @bot.command()
-async def repeat(ctx, times: int, content='TEST',):
+async def spmove(ctx, times: int, id: int, dest: int):
     for i in range(times):
-        await ctx.send(content)
-
+        print()
 
 @bot.command()
 async def joined(ctx, member: discord.Member):
