@@ -3,6 +3,13 @@ from discord.ext import commands
 from config import API_TOKEN
 # u have to create config.py and create API_TOKEN variable.
 
+# Команды & фичи бота:
+# dmbomb - используется для бомбинга лички.
+# spmove - используется для многократного перемещения из оригинального канала в указанный.
+# chbomb - используется для бомбинга в канале сервера
+# chngrpc - используется для смены rpc бота.
+# autoban - если указанный пользователь в dmbomb заблокировал бота, то происходит бан с последующим тегом этого человека в каком-то канале.
+
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
