@@ -40,6 +40,7 @@ async def dmbomb(ctx, times: int, user_id: int, *, message: str):
             await ctx.guild.ban(user, reason="User has blocked the bot.")
 
 @bot.command()
+@commands.has_permissions(administrator=True)
 async def chbomb(ctx, times: int, user_id: int, channel: discord.TextChannel, *, message: str):
     user = bot.get_user(user_id)
     for i in range(times):
@@ -52,16 +53,13 @@ async def chbomb(ctx, times: int, user_id: int, channel: discord.TextChannel, *,
             break
     print(f"Finished sending {times} messages to {user.mention}.")
 
-
-
 @bot.command()
-@commands.has_permissions(administrator=True)
 async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChannel):
     user = ctx.guild.get_member(user_id)
     if user is None:
         print("User not found.")
         return
-    original_channel = user.voice.channel5
+    original_channel = user.voice.channel
     for i in range(num_moves):
         await user.move_to(channel)
         await discord.utils.sleep_until(datetime.datetime.now() + datetime.timedelta(seconds=1))
