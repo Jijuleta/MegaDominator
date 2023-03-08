@@ -34,9 +34,6 @@ async def dmbomb(ctx, times: int, user_id: int, *, message: str):
             await user.send(message)
         except discord.Forbidden:
             print(f"User {user.name} has blocked the bot.")
-            # Log the error to the console or a log file
-            print(f"ERROR: {user.name} has blocked the bot.")
-            # Ban the user from the server
             await ctx.guild.ban(user, reason="User has blocked the bot.")
 
 @bot.command()
