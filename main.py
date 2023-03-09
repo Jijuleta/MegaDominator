@@ -38,6 +38,11 @@ async def dmbomb(ctx, times: int, user_id: int, *, message: str):
             print(f"User {user.name} has blocked the bot.")
             await ctx.guild.ban(user, reason="User has blocked the bot.")
 
+@dmbomb.error
+async def dmbomb_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
+
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def chbomb(ctx, times: int, user_id: int):
@@ -56,10 +61,18 @@ async def chbomb(ctx, times: int, user_id: int):
     await asyncio.sleep(300)
     await channel.delete()
 
+@chbomb.error
+async def chbomb_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
+
 
 
 @bot.command()
 async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChannel):
+    if num_moves > 100:
+        await ctx.send("Максимальное количество перемещений - 100.")
+        return
     user = ctx.guild.get_member(user_id)
     if user is None:
         print("User not found.")
@@ -72,17 +85,25 @@ async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChanne
         await discord.utils.sleep_until(datetime.datetime.now() + datetime.timedelta(seconds=1))
     print(f"Moved {user.name} back and forth between {channel.name} and {original_channel.name} {num_moves} times.")
 
+
 @bot.command()
 async def chngrpc(ctx, *, rpc_name: str):
     activity = discord.Activity(name=rpc_name, type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
     print(f"Changed Rich Presence to: {rpc_name}")
+    await ctx.send(f"Rich Presence был изменен на: {rpc_name}")
 
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def purge(ctx, limit: int):
     await ctx.channel.purge(limit=limit+1)
     print(f"{limit} messages have been purged by {ctx.author.mention}.", delete_after=5)
+    
+@purge.error
+async def purge_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
+
 
 @bot.command()
 async def help(ctx):
