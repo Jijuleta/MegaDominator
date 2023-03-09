@@ -20,6 +20,8 @@ intents.members = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
+MUSIC_LIBRARY_PATH = './media/'
+
 
 @bot.event
 async def on_ready():
@@ -142,6 +144,31 @@ async def zaRUS(ctx):
     await ctx.send(f'Закончил воспроизведение песни SHAMAN - Я РУССКИЙ')
     await voice_client.disconnect()
 
+audio_files = [f for f in os.listdir(MUSIC_LIBRARY_PATH) if f.endswith('.mp3') or f.endswith('.wav') or f.endswith('.mp4')]
+
+@bot.command()
+async def list(ctx):
+
+    song_list = '\n'.join([f'{i}. {song}' for i, song in enumerate(audio_files, start=1)])
+
+    await ctx.send(f'Доступные песни:\n{song_list}')
+
+@bot.command()
+async def play(ctx, song_number: int):
+    voice_channel = ctx.author.voice.channel
+    voice_client = await voice_channel.connect()
+
+    song_path = os.path.join(MUSIC_LIBRARY_PATH, audio_files[song_number - 1])
+
+    audio_source = discord.FFmpegPCMAudio(song_path)
+    voice_client.play(audio_source)
+
+    while voice_client.is_playing():
+        await asyncio.sleep(1)
+
+    await voice_client.disconnect()
+
+
 @bot.command()
 async def help(ctx):
     embed = discord.Embed(title="Команды бота", color=0x00ff00)
@@ -150,7 +177,8 @@ async def help(ctx):
     embed.add_field(name="$spmove [num_moves] [user_id] [channel]", value="Супер-перемещение между оригинальным и указанным каналом.", inline=False)
     embed.add_field(name="$chngrpc [rpc_name]", value="Поменять Rich Presence бота.", inline=False)
     embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
-    embed.add_field(name="$zaRUS", value="Воспроизвести песню SHAMAN - Я РУССКИЙ", inline=False)
+    embed.add_field(name="$list", value="Выводит список доступных песен.", inline=False)
+    embed.add_field(name="$play [number of music]", value="Воспроизводит выбранную песню", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="Прекрасный Витюша Мастифф!!!", inline=False)
     await ctx.send(embed=embed)
