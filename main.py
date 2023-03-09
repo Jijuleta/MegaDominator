@@ -2,6 +2,7 @@ import discord
 import datetime
 import asyncio
 import os
+import random
 from discord.ext import commands
 from discord.utils import get
 from discord import FFmpegPCMAudio
@@ -156,7 +157,8 @@ async def play(ctx, song_number: int):
         while voice_client.is_playing():
             await asyncio.sleep(1)
 
-        if song_queue:
+        if len(song_queue) > 0:
+            random.shuffle(song_queue)
             next_song_number = song_queue.popleft()
             next_song_path = os.path.join(MUSIC_LIBRARY_PATH, audio_files[next_song_number - 1])
             next_audio_source = discord.FFmpegPCMAudio(next_song_path)
@@ -175,13 +177,15 @@ async def queue(ctx):
 @bot.command()
 async def stop(ctx):
     voice_client = ctx.voice_client
-    if voice_client.is_playing():
-        await ctx.send('Останавливаю воспроизведение музыки.')
-        voice_client.stop()
+    if voice_client:
+        if voice_client.is_playing():
+            await ctx.send('Останавливаю воспроизведение музыки.')
+            voice_client.stop()
         song_queue.clear()
         await voice_client.disconnect()
     else:
         await ctx.send('Ничего не проигрывается.')
+
 
 
 @bot.command()
