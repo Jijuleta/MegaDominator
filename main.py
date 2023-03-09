@@ -84,4 +84,14 @@ async def purge(ctx, limit: int):
     await ctx.channel.purge(limit=limit+1)
     print(f"{limit} messages have been purged by {ctx.author.mention}.", delete_after=5)
 
+@bot.command()
+async def help(ctx):
+    embed = discord.Embed(title="Команды бота", color=0x00ff00)
+    embed.add_field(name="$dmbomb [times] [user_id] [message]", value="Отправить сообщение в личку определенное количество раз.(требуются админ права)", inline=False)
+    embed.add_field(name="$chbomb [times] [user_id]", value="Создать временный канал, где человек будет тегнут определенное количество раз.(требуются админ права)", inline=False)
+    embed.add_field(name="$spmove [num_moves] [user_id] [channel]", value="Супер-перемещение между оригинальным и указанным каналом.", inline=False)
+    embed.add_field(name="$chngrpc [rpc_name]", value="Поменять Rich Presence бота.", inline=False)
+    embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
+    await ctx.send(embed=embed)
+
 bot.run(API_TOKEN)
