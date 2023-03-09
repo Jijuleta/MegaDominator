@@ -7,6 +7,7 @@ from discord.utils import get
 from discord import FFmpegPCMAudio
 from config import API_TOKEN
 from collections import deque
+
 # u have to create config.py and create API_TOKEN variable.
 
 # Команды & фичи бота:
@@ -171,6 +172,17 @@ async def queue(ctx):
         song_queue_list = '\n'.join([f'{i}. {audio_files[song_number - 1]}' for i, song_number in enumerate(song_queue, start=1)])
         await ctx.send(f'Очередь:\n{song_queue_list}')
 
+@bot.command()
+async def stop(ctx):
+    voice_client = ctx.voice_client
+    if voice_client.is_playing():
+        await ctx.send('Останавливаю воспроизведение музыки.')
+        voice_client.stop()
+        song_queue.clear()
+        await voice_client.disconnect()
+    else:
+        await ctx.send('Ничего не проигрывается.')
+
 
 @bot.command()
 async def help(ctx):
@@ -183,6 +195,7 @@ async def help(ctx):
     embed.add_field(name="$list", value="Выводит список доступных песен.", inline=False)
     embed.add_field(name="$play [number of music]", value="Воспроизводит выбранную песню.", inline=False)
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
+    embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="Прекрасный Витюша Мастифф!!!", inline=False)
     await ctx.send(embed=embed)
