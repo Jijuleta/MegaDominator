@@ -6,6 +6,7 @@ from discord.ext import commands
 from discord.utils import get
 from discord import FFmpegPCMAudio
 from config import API_TOKEN
+from collections import deque
 # u have to create config.py and create API_TOKEN variable.
 
 # Команды & фичи бота:
@@ -20,13 +21,14 @@ intents.members = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
-MUSIC_LIBRARY_PATH = './media/'
 
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
+    activity = discord.Activity(name="абрусил саси хахаха", type=discord.ActivityType.watching, details="Watching", state="Discord")
+    await bot.change_presence(activity=activity)
 
 @bot.command()
 #@commands.has_permissions(administrator=True)
@@ -123,50 +125,51 @@ async def purge_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
 
-@bot.command()
-async def zaRUS(ctx):
-    max_users = 0
-    target_vc = None
-    for vc in ctx.guild.voice_channels:
-        num_users = len(vc.members)
-        if num_users > max_users:
-            max_users = num_users
-            target_vc = vc
-    if target_vc is None:
-        await ctx.send("Я не нашел пользователей в каналах.")
-        return
-    voice_client = await target_vc.connect()
-    audio_source = discord.FFmpegPCMAudio(os.path.join("media", "JARUSSKIY.mp4"))
-    voice_client.play(audio_source)
-    await ctx.send(f'Начинаю воспроизводить SHAMAN - Я РУССКИЙ')
-    while voice_client.is_playing():
-        await asyncio.sleep(1)
-    await ctx.send(f'Закончил воспроизведение песни SHAMAN - Я РУССКИЙ')
-    await voice_client.disconnect()
-
+MUSIC_LIBRARY_PATH = './media/'
 audio_files = [f for f in os.listdir(MUSIC_LIBRARY_PATH) if f.endswith('.mp3') or f.endswith('.wav') or f.endswith('.mp4')]
+
+song_queue = deque()
 
 @bot.command()
 async def list(ctx):
-
     song_list = '\n'.join([f'{i}. {song}' for i, song in enumerate(audio_files, start=1)])
-
     await ctx.send(f'Доступные песни:\n{song_list}')
 
 @bot.command()
 async def play(ctx, song_number: int):
-    voice_channel = ctx.author.voice.channel
-    voice_client = await voice_channel.connect()
+    voice_client = ctx.voice_client
+
+    if not voice_client:
+        voice_channel = ctx.author.voice.channel
+        voice_client = await voice_channel.connect()
 
     song_path = os.path.join(MUSIC_LIBRARY_PATH, audio_files[song_number - 1])
 
-    audio_source = discord.FFmpegPCMAudio(song_path)
-    voice_client.play(audio_source)
+    if voice_client.is_playing():
+        song_queue.append(song_number)
+        await ctx.send(f'Песня #{song_number} добавлена в очередь.')
+    else:
+        audio_source = discord.FFmpegPCMAudio(song_path)
+        voice_client.play(audio_source)
 
-    while voice_client.is_playing():
-        await asyncio.sleep(1)
+        while voice_client.is_playing():
+            await asyncio.sleep(1)
 
-    await voice_client.disconnect()
+        if song_queue:
+            next_song_number = song_queue.popleft()
+            next_song_path = os.path.join(MUSIC_LIBRARY_PATH, audio_files[next_song_number - 1])
+            next_audio_source = discord.FFmpegPCMAudio(next_song_path)
+            voice_client.play(next_audio_source, after=lambda e: asyncio.run_coroutine_threadsafe(play(ctx, next_song_number), bot.loop))
+        else:
+            await voice_client.disconnect()
+
+@bot.command()
+async def queue(ctx):
+    if len(song_queue) == 0:
+        await ctx.send('Очередь пуста.')
+    else:
+        song_queue_list = '\n'.join([f'{i}. {audio_files[song_number - 1]}' for i, song_number in enumerate(song_queue, start=1)])
+        await ctx.send(f'Очередь:\n{song_queue_list}')
 
 
 @bot.command()
@@ -178,7 +181,8 @@ async def help(ctx):
     embed.add_field(name="$chngrpc [rpc_name]", value="Поменять Rich Presence бота.", inline=False)
     embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
     embed.add_field(name="$list", value="Выводит список доступных песен.", inline=False)
-    embed.add_field(name="$play [number of music]", value="Воспроизводит выбранную песню", inline=False)
+    embed.add_field(name="$play [number of music]", value="Воспроизводит выбранную песню.", inline=False)
+    embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="Прекрасный Витюша Мастифф!!!", inline=False)
     await ctx.send(embed=embed)
