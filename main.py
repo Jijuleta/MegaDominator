@@ -16,7 +16,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
 async def on_ready():
@@ -85,7 +85,7 @@ async def purge(ctx, limit: int):
     print(f"{limit} messages have been purged by {ctx.author.mention}.", delete_after=5)
 
 @bot.command()
-async def assist(ctx):
+async def help(ctx):
     embed = discord.Embed(title="Команды бота", color=0x00ff00)
     embed.add_field(name="$dmbomb [times] [user_id] [message]", value="Отправить сообщение в личку определенное количество раз.(требуются админ права)", inline=False)
     embed.add_field(name="$chbomb [times] [user_id]", value="Создать временный канал, где человек будет тегнут определенное количество раз.(требуются админ права)", inline=False)
