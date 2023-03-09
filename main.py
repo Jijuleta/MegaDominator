@@ -1,7 +1,10 @@
 import discord
 import datetime
 import asyncio
+import os
 from discord.ext import commands
+from discord.utils import get
+from discord import FFmpegPCMAudio
 from config import API_TOKEN
 # u have to create config.py and create API_TOKEN variable.
 
@@ -118,7 +121,26 @@ async def purge_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
 
-
+@bot.command()
+async def zaRUS(ctx):
+    max_users = 0
+    target_vc = None
+    for vc in ctx.guild.voice_channels:
+        num_users = len(vc.members)
+        if num_users > max_users:
+            max_users = num_users
+            target_vc = vc
+    if target_vc is None:
+        await ctx.send("Я не нашел пользователей в каналах.")
+        return
+    voice_client = await target_vc.connect()
+    audio_source = discord.FFmpegPCMAudio(os.path.join("media", "JARUSSKIY.mp4"))
+    voice_client.play(audio_source)
+    await ctx.send(f'Начинаю воспроизводить SHAMAN - Я РУССКИЙ')
+    while voice_client.is_playing():
+        await asyncio.sleep(1)
+    await ctx.send(f'Закончил воспроизведение песни SHAMAN - Я РУССКИЙ')
+    await voice_client.disconnect()
 
 @bot.command()
 async def help(ctx):
@@ -128,6 +150,7 @@ async def help(ctx):
     embed.add_field(name="$spmove [num_moves] [user_id] [channel]", value="Супер-перемещение между оригинальным и указанным каналом.", inline=False)
     embed.add_field(name="$chngrpc [rpc_name]", value="Поменять Rich Presence бота.", inline=False)
     embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
+    embed.add_field(name="$zaRUS", value="Воспроизвести песню SHAMAN - Я РУССКИЙ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="Прекрасный Витюша Мастифф!!!", inline=False)
     await ctx.send(embed=embed)
