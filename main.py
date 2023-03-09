@@ -33,6 +33,7 @@ async def dmbomb(ctx, times: int, user_id: int, *, message: str):
     for i in range(times):
         try:
             await user.send(message)
+            print(f'Dmbombing {user} with "{message}" message')
         except discord.Forbidden:
             print(f"User {user.name} has blocked the bot.")
             await ctx.guild.ban(user, reason="User has blocked the bot.")
@@ -49,6 +50,7 @@ async def chbomb(ctx, times: int, user_id: int):
     await channel.set_permissions(user, read_messages=True, send_messages=True)
 
     for i in range(times):
+        print(f'Chbombing {user} {i+1}/{times} times')
         await channel.send(f"Придурок на {user.mention}, тебя чпокнули {i+1}/{times} раз")
 
     await asyncio.sleep(300)
