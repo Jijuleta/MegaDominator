@@ -1,5 +1,6 @@
 import discord
 import datetime
+import asyncio
 from discord.ext import commands
 from config import API_TOKEN
 # u have to create config.py and create API_TOKEN variable.
@@ -35,6 +36,25 @@ async def dmbomb(ctx, times: int, user_id: int, *, message: str):
         except discord.Forbidden:
             print(f"User {user.name} has blocked the bot.")
             await ctx.guild.ban(user, reason="User has blocked the bot.")
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def chbomb(ctx, times: int, user_id: int):
+    user = bot.get_user(user_id)
+    if user is None:
+        print(f"User with ID {user_id} not found.")
+        return
+
+    channel = await ctx.guild.create_text_channel(name=f"chbomb-{user_id}")
+    await channel.set_permissions(user, read_messages=True, send_messages=True)
+
+    for i in range(times):
+        await channel.send(f"Придурок на {user.mention}, тебя чпокнули {i+1}/{times} раз")
+
+    await asyncio.sleep(300)
+    await channel.delete()
+
+
 
 @bot.command()
 async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChannel):
