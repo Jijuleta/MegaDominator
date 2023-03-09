@@ -10,4 +10,5 @@
 - For Linux: https://ffmpeg.org/download.html#build-linux
 
 # ЛЮТАЯ МУЗЫКАЛЬНАЯ БИБЛИОТЕКА:
+Папку скидывать в корень программы.
 - https://drive.google.com/drive/folders/11oTtbKapsU6ZvEkZgFz-frncZ5zedPxK?usp=sharing
