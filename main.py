@@ -24,8 +24,11 @@ async def on_ready():
     print('------')
 
 @bot.command()
-@commands.has_permissions(administrator=True)
+#@commands.has_permissions(administrator=True)
 async def dmbomb(ctx, times: int, user_id: int, *, message: str):
+    if times > 100:
+        await ctx.send("Максимальное количество перемещений - 100.")
+        return
     user = bot.get_user(user_id)
     if user is None:
         print(f"User with ID {user_id} not found.")
@@ -37,15 +40,21 @@ async def dmbomb(ctx, times: int, user_id: int, *, message: str):
         except discord.Forbidden:
             print(f"User {user.name} has blocked the bot.")
             await ctx.guild.ban(user, reason="User has blocked the bot.")
+    
+    await ctx.send(f'{user} был изнасилован в личных сообщениях {times} раз.')
 
-@dmbomb.error
+
+"""@dmbomb.error
 async def dmbomb_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
 
 @bot.command()
-@commands.has_permissions(administrator=True)
+#@commands.has_permissions(administrator=True)
 async def chbomb(ctx, times: int, user_id: int):
+    if times > 100:
+        await ctx.send("Максимальное количество перемещений - 100.")
+        return
     user = bot.get_user(user_id)
     if user is None:
         print(f"User with ID {user_id} not found.")
@@ -57,14 +66,15 @@ async def chbomb(ctx, times: int, user_id: int):
     for i in range(times):
         print(f'Chbombing {user} {i+1}/{times} times')
         await channel.send(f"Придурок на {user.mention}, тебя чпокнули {i+1}/{times} раз")
-
-    await asyncio.sleep(300)
+    await ctx.send(f"{user} был чпокнут в канале {times} раз.")
+    await asyncio.sleep(180)
     await channel.delete()
 
-@chbomb.error
+
+"""@chbomb.error
 async def chbomb_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
 
 
 
@@ -84,6 +94,7 @@ async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChanne
         await user.move_to(original_channel)
         await discord.utils.sleep_until(datetime.datetime.now() + datetime.timedelta(seconds=1))
     print(f"Moved {user.name} back and forth between {channel.name} and {original_channel.name} {num_moves} times.")
+    await ctx.send(f"Пользователь {user.name} был перемещен между {channel.name} и {original_channel.name} {num_moves} раз.")
 
 
 @bot.command()
@@ -96,8 +107,11 @@ async def chngrpc(ctx, *, rpc_name: str):
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def purge(ctx, limit: int):
-    await ctx.channel.purge(limit=limit+1)
-    print(f"{limit} messages have been purged by {ctx.author.mention}.", delete_after=5)
+    if limit > 100:
+        await ctx.send("Максимальное количество перемещений - 100.")
+        return
+    deleted = await ctx.channel.purge(limit=limit+1)
+    await ctx.send(f"{len(deleted) - 1} сообщений было успешно удалено!")
     
 @purge.error
 async def purge_error(ctx, error):
@@ -105,11 +119,12 @@ async def purge_error(ctx, error):
         await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
 
 
+
 @bot.command()
 async def help(ctx):
     embed = discord.Embed(title="Команды бота", color=0x00ff00)
-    embed.add_field(name="$dmbomb [times] [user_id] [message]", value="Отправить сообщение в личку определенное количество раз.(требуются админ права)", inline=False)
-    embed.add_field(name="$chbomb [times] [user_id]", value="Создать временный канал, где человек будет тегнут определенное количество раз.(требуются админ права)", inline=False)
+    embed.add_field(name="$dmbomb [times] [user_id] [message]", value="Отправить сообщение в личку определенное количество раз.", inline=False)
+    embed.add_field(name="$chbomb [times] [user_id]", value="Создать временный канал, где человек будет тегнут определенное количество раз.", inline=False)
     embed.add_field(name="$spmove [num_moves] [user_id] [channel]", value="Супер-перемещение между оригинальным и указанным каналом.", inline=False)
     embed.add_field(name="$chngrpc [rpc_name]", value="Поменять Rich Presence бота.", inline=False)
     embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
