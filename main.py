@@ -140,7 +140,7 @@ async def id(ctx, user: Union[discord.Member, int]):
     else:
         return await ctx.send('Неправильный ввод.')
     
-    await ctx.send(f"ID пользователя {user.display_name} - {user.id}.")
+    await ctx.send(f"ID пользователя {user.display_name} - {user.id}")
 
 
 MUSIC_LIBRARY_PATH = './media/'
