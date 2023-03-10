@@ -8,6 +8,7 @@ from discord.utils import get
 from discord import FFmpegPCMAudio
 from config import API_TOKEN
 from collections import deque
+from typing import Union
 
 # u have to create config.py and create API_TOKEN variable.
 
@@ -127,6 +128,21 @@ async def purge_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
 
+@bot.command()
+async def id(ctx, user: Union[discord.Member, int]):
+    if isinstance(user, int):
+        try:
+            user = await bot.fetch_user(user)
+        except discord.NotFound:
+            return await ctx.send('Неверный ID пользователя.')
+    elif isinstance(user, discord.Member):
+        pass
+    else:
+        return await ctx.send('Неправильный ввод.')
+    
+    await ctx.send(f"ID пользователя {user.display_name} - {user.id}.")
+
+
 MUSIC_LIBRARY_PATH = './media/'
 audio_files = [f for f in os.listdir(MUSIC_LIBRARY_PATH) if f.endswith('.mp3') or f.endswith('.wav') or f.endswith('.mp4')]
 
@@ -196,6 +212,9 @@ async def help(ctx):
     embed.add_field(name="$spmove [num_moves] [user_id] [channel]", value="Супер-перемещение между оригинальным и указанным каналом.", inline=False)
     embed.add_field(name="$chngrpc [rpc_name]", value="Поменять Rich Presence бота.", inline=False)
     embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
+    embed.add_field(name="$id [@user] or [user id]", value="При умоминании пользователя выводит его ID, если отправить ID пользователя, то бот отправит владельца ID.")
+    embed.add_field(name=" ",value=" ", inline=False)
+    embed.add_field(name="ДЛЯ РАБОТЫ МУЗЫКИ НУЖНО УСТАНОВИТЬ FFmpeg.", value="", inline=False)
     embed.add_field(name="$list", value="Выводит список доступных песен.", inline=False)
     embed.add_field(name="$play [number of music]", value="Воспроизводит выбранную песню.", inline=False)
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
