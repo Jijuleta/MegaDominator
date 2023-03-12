@@ -175,7 +175,8 @@ async def play(ctx, song_number: int):
 
         if len(song_queue) > 0:
             random.shuffle(song_queue)
-            next_song_number = song_queue.popleft()
+            song_queue.popleft()
+            next_song_number = song_queue[0]
             next_song_path = os.path.join(MUSIC_LIBRARY_PATH, audio_files[next_song_number - 1])
             next_audio_source = discord.FFmpegPCMAudio(next_song_path)
             voice_client.play(next_audio_source, after=lambda e: asyncio.run_coroutine_threadsafe(play(ctx, next_song_number), bot.loop))
