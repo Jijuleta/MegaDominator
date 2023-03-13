@@ -2,12 +2,9 @@ import discord
 import datetime
 import asyncio
 import os
-import random
 from discord.ext import commands
 from discord.utils import get
-from discord import FFmpegPCMAudio
 from config import API_TOKEN
-from collections import deque
 from typing import Union
 
 # u have to create config.py and create API_TOKEN variable.
@@ -142,66 +139,14 @@ async def id(ctx, user: Union[discord.Member, int]):
     
     await ctx.send(f"ID пользователя {user.display_name} - {user.id}")
 
+# MUSIC FEATURES
+# $play - {s(single) or p(playlist)} {song or name of playlist}
+# $stop - останавливает воспроизведение песни.
+# $skip - пропускает песню.
+# $list {l(list of all songs) or p(playlists)} - показывает список всех песен или всех плейлистов.
+# $queue - показывает текущую очередь.
+# $create_playlist {name of playlist} {songs}.
 
-MUSIC_LIBRARY_PATH = './media/'
-audio_files = [f for f in os.listdir(MUSIC_LIBRARY_PATH) if f.endswith('.mp3') or f.endswith('.wav') or f.endswith('.mp4')]
-
-song_queue = deque()
-
-@bot.command()
-async def list(ctx):
-    song_list = '\n'.join([f'{i}. {song}' for i, song in enumerate(audio_files, start=1)])
-    await ctx.send(f'Доступные песни:\n{song_list}')
-
-@bot.command()
-async def play(ctx, song_number: int):
-    voice_client = ctx.voice_client
-
-    if not voice_client:
-        voice_channel = ctx.author.voice.channel
-        voice_client = await voice_channel.connect()
-
-    song_path = os.path.join(MUSIC_LIBRARY_PATH, audio_files[song_number - 1])
-
-    if voice_client.is_playing():
-        song_queue.append(song_number)
-        await ctx.send(f'Песня #{song_number} добавлена в очередь.')
-    else:
-        audio_source = discord.FFmpegPCMAudio(song_path)
-        voice_client.play(audio_source)
-
-        while voice_client.is_playing():
-            await asyncio.sleep(1)
-
-        if len(song_queue) > 0:
-            random.shuffle(song_queue)
-            song_queue.popleft()
-            next_song_number = song_queue[0]
-            next_song_path = os.path.join(MUSIC_LIBRARY_PATH, audio_files[next_song_number - 1])
-            next_audio_source = discord.FFmpegPCMAudio(next_song_path)
-            voice_client.play(next_audio_source, after=lambda e: asyncio.run_coroutine_threadsafe(play(ctx, next_song_number), bot.loop))
-        else:
-            await voice_client.disconnect()
-
-@bot.command()
-async def queue(ctx):
-    if len(song_queue) == 0:
-        await ctx.send('Очередь пуста.')
-    else:
-        song_queue_list = '\n'.join([f'{i}. {audio_files[song_number - 1]}' for i, song_number in enumerate(song_queue, start=1)])
-        await ctx.send(f'Очередь:\n{song_queue_list}')
-
-@bot.command()
-async def stop(ctx):
-    voice_client = ctx.voice_client
-    if voice_client:
-        if voice_client.is_playing():
-            await ctx.send('Останавливаю воспроизведение музыки.')
-            voice_client.stop()
-        song_queue.clear()
-        await voice_client.disconnect()
-    else:
-        await ctx.send('Ничего не проигрывается.')
 
 
 
