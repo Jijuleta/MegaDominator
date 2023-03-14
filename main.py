@@ -11,19 +11,11 @@ from collections import deque
 
 # u have to create config.py and create API_TOKEN variable.
 
-# Команды & фичи бота:
-# dmbomb - используется для бомбинга лички.
-# spmove - используется для многократного перемещения из оригинального канала в указанный.
-# chbomb - используется для бомбинга в канале сервера
-# chngrpc - используется для смены rpc бота.
-# autoban - если указанный пользователь в dmbomb заблокировал бота, то происходит бан с последующим тегом этого человека в каком-то канале.
-
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
-
 
 @bot.event
 async def on_ready():
@@ -142,12 +134,6 @@ async def id(ctx, user: Union[discord.Member, int]):
     await ctx.send(f"ID пользователя {user.display_name} - {user.id}")
 
 # MUSIC FEATURES
-# $play - {s(single) or p(playlist)} {song or name of playlist}
-# $stop - останавливает воспроизведение песни.
-# $skip - пропускает песню.
-# $list {l(list of all songs) or p(playlists)} - показывает список всех песен или всех плейлистов.
-# $queue - показывает текущую очередь.
-# $create_playlist {name of playlist} {songs}.
 
 MUSIC_LIBRARY_PATH = './media/'
 audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3', '.wav', '.ogg'))]
@@ -213,8 +199,6 @@ async def queue(ctx):
     else:
         queue_list = '\n'.join([f'{i}. {os.path.splitext(os.path.basename(song))[0]}' for i, song in enumerate(song_queue, start=1)])
         await ctx.send(f'Очередь:\n{queue_list}')
-
-
 
 
 @bot.command()
