@@ -2,6 +2,7 @@ import discord
 import datetime
 import asyncio
 import os
+import json
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -199,6 +200,10 @@ async def queue(ctx):
     else:
         queue_list = '\n'.join([f'{i}. {os.path.splitext(os.path.basename(song))[0]}' for i, song in enumerate(song_queue, start=1)])
         await ctx.send(f'Очередь:\n{queue_list}')
+
+# PLAYLISTS MODULE:
+
+
 
 
 @bot.command()
