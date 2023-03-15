@@ -17,7 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.6.2"
+Version = "2.7"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -233,14 +233,9 @@ async def create_playlist(ctx, name, *songs):
     if name in playlists:
         await ctx.send("Плейлист с этим именем уже существует.")
     else:
-        songs = ' '.join(songs)
-        songs = re.findall(r'"[^"]+"|\S+', songs)
-        songs = [s.strip('"') for s in songs]
-
         playlists[name] = songs
         save_playlists(playlists)
         await ctx.send("Плейлист создан.")
-
 
 @bot.command()
 async def play_playlist(ctx, name):
