@@ -183,6 +183,14 @@ async def play(ctx, *, song_title: str):
             await voice_client.disconnect()
 
 @bot.command()
+async def queue(ctx):
+    if len(song_queue) == 0:
+        await ctx.send('Очередь пуста.')
+    else:
+        queue_list = '\n'.join([f'{i}. {os.path.splitext(os.path.basename(song))[0]}' for i, song in enumerate(song_queue, start=1)])
+        await ctx.send(f'Очередь:\n{queue_list}')
+
+@bot.command()
 async def stop(ctx):
     voice_client = ctx.voice_client
     if voice_client:
@@ -194,17 +202,7 @@ async def stop(ctx):
     else:
         await ctx.send('Ничего не проигрывается.')
 
-@bot.command()
-async def queue(ctx):
-    if len(song_queue) == 0:
-        await ctx.send('Очередь пуста.')
-    else:
-        queue_list = '\n'.join([f'{i}. {os.path.splitext(os.path.basename(song))[0]}' for i, song in enumerate(song_queue, start=1)])
-        await ctx.send(f'Очередь:\n{queue_list}')
-
 # PLAYLISTS MODULE:
-
-# Код немного не дописан.
 
 def load_playlists():
     if os.path.exists("playlists.json"):
@@ -269,8 +267,18 @@ async def help(ctx):
     embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
     embed.add_field(name="$id [@user] or [user id]", value="При умоминании пользователя выводит его ID, если отправить ID пользователя, то бот отправит владельца ID.")
     embed.add_field(name=" ",value=" ", inline=False)
+    embed.add_field(name="ДЛЯ РАБОТЫ МУЗЫКИ НУЖНО УСТАНОВИТЬ FFmpeg.", value="", inline=False)
+    embed.add_field(name="$list", value="Выводит список доступных песен.", inline=False)
+    embed.add_field(name="$play [song title]", value="Воспроизводит выбранную песню.", inline=False)
+    embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
+    embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
+    embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
+    embed.add_field(name='$create_playlist "playlist title" "song1" "song2"...', value="Создает новый плейлист.", inline=False)
+    embed.add_field(name="$play_playlist [playlist title]", value="Воспроизводит плейлист.",inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
-    embed.add_field(name="Автор замечательного бота:", value="Прекрасный Витюша Мастифф!!!", inline=False)
+    embed.add_field(name=" ", value= " ", inline=False)
+    embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
+    embed.add_field(name="VERSION:", value= "**2.6**", inline=False)
     await ctx.send(embed=embed)
 
 bot.run(API_TOKEN)
