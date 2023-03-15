@@ -17,7 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.7"
+Version = "2.7.1"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -269,7 +269,7 @@ async def help(ctx):
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
     embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
     embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
-    embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ)", inline=False)
+    embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: НАЗВАНИЕ ПЛЕЙЛИСТА ДОЛЖНО СОСТОЯТЬ ИЗ 1 слова.**)", inline=False)
     embed.add_field(name="$play_playlist [playlist title]", value="Воспроизводит плейлист.",inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
