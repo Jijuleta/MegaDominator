@@ -2,29 +2,22 @@ import discord
 import datetime
 import asyncio
 import os
-import random
+import json
+import re
+from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
-from discord import FFmpegPCMAudio
 from config import API_TOKEN
-from collections import deque
 from typing import Union
+from collections import deque
 
 # u have to create config.py and create API_TOKEN variable.
-
-# Команды & фичи бота:
-# dmbomb - используется для бомбинга лички.
-# spmove - используется для многократного перемещения из оригинального канала в указанный.
-# chbomb - используется для бомбинга в канале сервера
-# chngrpc - используется для смены rpc бота.
-# autoban - если указанный пользователь в dmbomb заблокировал бота, то происходит бан с последующим тегом этого человека в каком-то канале.
 
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
-
 
 @bot.event
 async def on_ready():
@@ -142,30 +135,39 @@ async def id(ctx, user: Union[discord.Member, int]):
     
     await ctx.send(f"ID пользователя {user.display_name} - {user.id}")
 
+# MUSIC FEATURES
 
 MUSIC_LIBRARY_PATH = './media/'
-audio_files = [f for f in os.listdir(MUSIC_LIBRARY_PATH) if f.endswith('.mp3') or f.endswith('.wav') or f.endswith('.mp4')]
+audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3', '.wav', '.ogg'))]
+
+song_dict = {}
+for file_name in audio_files:
+    title = os.path.splitext(file_name)[0]
+    song_dict[title] = os.path.join(MUSIC_LIBRARY_PATH, file_name)
 
 song_queue = deque()
 
 @bot.command()
 async def list(ctx):
-    song_list = '\n'.join([f'{i}. {song}' for i, song in enumerate(audio_files, start=1)])
+    song_list = '\n'.join([f'{i}. {os.path.splitext(song)[0]}' for i, song in enumerate(audio_files, start=1)])
     await ctx.send(f'Доступные песни:\n{song_list}')
 
 @bot.command()
-async def play(ctx, song_number: int):
+async def play(ctx, *, song_title: str):
     voice_client = ctx.voice_client
 
     if not voice_client:
         voice_channel = ctx.author.voice.channel
         voice_client = await voice_channel.connect()
 
-    song_path = os.path.join(MUSIC_LIBRARY_PATH, audio_files[song_number - 1])
+    song_path = song_dict.get(song_title)
+    if not song_path:
+        await ctx.send(f"Я не смог найти песню с таким названием: {song_title}.")
+        return
 
     if voice_client.is_playing():
-        song_queue.append(song_number)
-        await ctx.send(f'Песня #{song_number} добавлена в очередь.')
+        song_queue.append(song_path)
+        await ctx.send(f'{song_title} добавлена в очередь.')
     else:
         audio_source = discord.FFmpegPCMAudio(song_path)
         voice_client.play(audio_source)
@@ -174,22 +176,11 @@ async def play(ctx, song_number: int):
             await asyncio.sleep(1)
 
         if len(song_queue) > 0:
-            random.shuffle(song_queue)
-            song_queue.popleft()
-            next_song_number = song_queue[0]
-            next_song_path = os.path.join(MUSIC_LIBRARY_PATH, audio_files[next_song_number - 1])
-            next_audio_source = discord.FFmpegPCMAudio(next_song_path)
-            voice_client.play(next_audio_source, after=lambda e: asyncio.run_coroutine_threadsafe(play(ctx, next_song_number), bot.loop))
+            next_song_path = song_queue.popleft()
+            next_song_title = os.path.splitext(os.path.basename(next_song_path))[0]
+            voice_client.play(discord.FFmpegPCMAudio(next_song_path), after=lambda e: asyncio.run_coroutine_threadsafe(play(ctx, next_song_title), bot.loop))
         else:
             await voice_client.disconnect()
-
-@bot.command()
-async def queue(ctx):
-    if len(song_queue) == 0:
-        await ctx.send('Очередь пуста.')
-    else:
-        song_queue_list = '\n'.join([f'{i}. {audio_files[song_number - 1]}' for i, song_number in enumerate(song_queue, start=1)])
-        await ctx.send(f'Очередь:\n{song_queue_list}')
 
 @bot.command()
 async def stop(ctx):
@@ -203,7 +194,70 @@ async def stop(ctx):
     else:
         await ctx.send('Ничего не проигрывается.')
 
+@bot.command()
+async def queue(ctx):
+    if len(song_queue) == 0:
+        await ctx.send('Очередь пуста.')
+    else:
+        queue_list = '\n'.join([f'{i}. {os.path.splitext(os.path.basename(song))[0]}' for i, song in enumerate(song_queue, start=1)])
+        await ctx.send(f'Очередь:\n{queue_list}')
 
+# PLAYLISTS MODULE:
+
+# Код немного не дописан.
+
+def load_playlists():
+    if os.path.exists("playlists.json"):
+        with open("playlists.json", "r") as f:
+            playlists = json.load(f)
+    else:
+        playlists = {}
+        with open("playlists.json", "w") as f:
+            json.dump(playlists, f)
+    return playlists
+
+def save_playlists(playlists):
+    with open("playlists.json", "w") as f:
+        json.dump(playlists, f)
+
+@bot.command()
+async def playlists(ctx):
+    playlists = load_playlists()
+    if not playlists:
+        await ctx.send("Нету доступных плейлистов.")
+    else:
+        await ctx.send("Доступные плейлисты:\n" + "\n".join(playlists.keys()))
+
+@bot.command()
+async def create_playlist(ctx, name, *songs):
+    playlists = load_playlists()
+    if name in playlists:
+        await ctx.send("Плейлист с этим именем уже существует.")
+    else:
+        songs = ' '.join(songs)
+        songs = re.findall(r'"[^"]+"|\S+', songs)
+        songs = [s.strip('"') for s in songs]
+
+        playlists[name] = songs
+        save_playlists(playlists)
+        await ctx.send("Плейлист создан.")
+
+
+@bot.command()
+async def play_playlist(ctx, name):
+    playlists = load_playlists()
+    if name not in playlists:
+        await ctx.send("Плейлиста с таким именем не существует.")
+    else:
+        await ctx.send("Проигрываю плейлист: " + name)
+        voice_channel = ctx.author.voice.channel
+        voice_client = await voice_channel.connect()
+        for song in playlists[name]:
+            source = FFmpegPCMAudio(f"./media/{song}.mp3")
+            voice_client.play(source)
+            while voice_client.is_playing():
+                await asyncio.sleep(1)
+        await voice_client.disconnect()
 
 @bot.command()
 async def help(ctx):
@@ -215,11 +269,6 @@ async def help(ctx):
     embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
     embed.add_field(name="$id [@user] or [user id]", value="При умоминании пользователя выводит его ID, если отправить ID пользователя, то бот отправит владельца ID.")
     embed.add_field(name=" ",value=" ", inline=False)
-    embed.add_field(name="ДЛЯ РАБОТЫ МУЗЫКИ НУЖНО УСТАНОВИТЬ FFmpeg.", value="", inline=False)
-    embed.add_field(name="$list", value="Выводит список доступных песен.", inline=False)
-    embed.add_field(name="$play [number of music]", value="Воспроизводит выбранную песню.", inline=False)
-    embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
-    embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="Прекрасный Витюша Мастифф!!!", inline=False)
     await ctx.send(embed=embed)
