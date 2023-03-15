@@ -278,7 +278,7 @@ async def help(ctx):
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
-    embed.add_field(name="VERSION:", value= "**2.6**", inline=False)
+    embed.add_field(name="VERSION:", value= "**2.6.1**", inline=False)
     await ctx.send(embed=embed)
 
 bot.run(API_TOKEN)
