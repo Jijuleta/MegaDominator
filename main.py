@@ -23,7 +23,7 @@ bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
-    activity = discord.Activity(name="абрусил саси хахаха", type=discord.ActivityType.watching, details="Watching", state="Discord")
+    activity = discord.Activity(name="Version 2.6", type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
 
 @bot.command()
