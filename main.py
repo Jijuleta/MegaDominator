@@ -301,6 +301,7 @@ async def help(ctx):
     embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: НАЗВАНИЕ ПЛЕЙЛИСТА ДОЛЖНО СОСТОЯТЬ ИЗ 1 слова.**)", inline=False)
     embed.add_field(name="$play_playlist [playlist title]", value="Воспроизводит плейлист.",inline=False)
     embed.add_field(name="$delete_playlist [playlist title]", value="Удаляет плейлист.",inline=False)
+    embed.add_field(name="$shuffle_playlist [playlist title]", value="Воспроизводит перемешанный плейлист.",inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
