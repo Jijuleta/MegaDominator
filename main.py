@@ -17,13 +17,14 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
+Version = "2.6.2"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
-    activity = discord.Activity(name="Version 2.6.1", type=discord.ActivityType.watching, details="Watching", state="Discord")
+    activity = discord.Activity(name=f'Version {Version}', type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
 
 @bot.command()
@@ -273,12 +274,12 @@ async def help(ctx):
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
     embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
     embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
-    embed.add_field(name='$create_playlist "playlist title" "song1" "song2"...', value="Создает новый плейлист.", inline=False)
+    embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ)", inline=False)
     embed.add_field(name="$play_playlist [playlist title]", value="Воспроизводит плейлист.",inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
-    embed.add_field(name="VERSION:", value= "**2.6.1**", inline=False)
+    embed.add_field(name="VERSION:", value= f'{Version}', inline=False)
     await ctx.send(embed=embed)
 
 bot.run(API_TOKEN)
