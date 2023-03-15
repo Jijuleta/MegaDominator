@@ -45,7 +45,7 @@ async def dmbomb(ctx, times: int, user_id: int, *, message: str):
             print(f"User {user.name} has blocked the bot.")
             await ctx.guild.ban(user, reason="User has blocked the bot.")
     
-    await ctx.send(f'{user} был изнасилован в личных сообщениях {times} раз.')
+    await ctx.send(f'{user} был уничтожен в личных сообщениях {times} раз.')
 
 
 """@dmbomb.error
@@ -69,8 +69,8 @@ async def chbomb(ctx, times: int, user_id: int):
 
     for i in range(times):
         print(f'Chbombing {user} {i+1}/{times} times')
-        await channel.send(f"Придурок на {user.mention}, тебя чпокнули {i+1}/{times} раз")
-    await ctx.send(f"{user} был чпокнут в канале {times} раз.")
+        await channel.send(f"Дурашка на {user.mention}, тебя чпокнули {i+1}/{times} раз")
+    await ctx.send(f"{user} был разбомблен в канале {times} раз.")
     await asyncio.sleep(180)
     await channel.delete()
 
