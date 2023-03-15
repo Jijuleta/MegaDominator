@@ -3,6 +3,7 @@ import datetime
 import asyncio
 import os
 import json
+import re
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -233,9 +234,14 @@ async def create_playlist(ctx, name, *songs):
     if name in playlists:
         await ctx.send("Плейлист с этим именем уже существует.")
     else:
+        songs = ' '.join(songs)
+        songs = re.findall(r'"[^"]+"|\S+', songs)
+        songs = [s.strip('"') for s in songs]
+
         playlists[name] = songs
         save_playlists(playlists)
         await ctx.send("Плейлист создан.")
+
 
 @bot.command()
 async def play_playlist(ctx, name):
