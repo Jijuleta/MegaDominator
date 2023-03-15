@@ -4,6 +4,7 @@ import asyncio
 import os
 import json
 import re
+import random
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -17,7 +18,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.7.6"
+Version = "2.7.7"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -261,7 +262,25 @@ async def delete_playlist(ctx, name):
         save_playlists(playlists)
         await ctx.send("Плейлист удалён.")
     else:
-        await ctx.send("Плейлиста с этим именем не существует.")
+        await ctx.send("Плейлиста с таким именем не существует.")
+        
+@bot.command()
+async def shuffle_playlist(ctx, name):
+    playlists = load_playlists()
+    if name in playlists:
+        cur_playlist = playlists[name]
+        random.shuffle(cur_playlist)
+        await ctx.send("Проигрываю перемешанный плейлист: " + name)
+        voice_channel = ctx.author.voice.channel
+        voice_client = await voice_channel.connect()
+        for song in cur_playlist:
+            source = FFmpegPCMAudio(f"./media/{song}.mp3")
+            voice_client.play(source)
+            while voice_client.is_playing():
+                await asyncio.sleep(1)
+        await voice_client.disconnect()
+    else:
+        await ctx.send("Плейлиста с таким именем не существует.")
 
 @bot.command()
 async def help(ctx):
