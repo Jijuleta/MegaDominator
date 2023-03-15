@@ -18,7 +18,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.7.7"
+Version = "2.7.8"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -206,15 +206,19 @@ async def stop(ctx):
 
 # PLAYLISTS MODULE:
 
-def load_playlists():
+def load_playlists(playlist_name=None):
     if os.path.exists("playlists.json"):
         with open("playlists.json", "r") as f:
             playlists = json.load(f)
+            if playlist_name:
+                return playlists.get(playlist_name)
+            else:
+                return playlists
     else:
         playlists = {}
         with open("playlists.json", "w") as f:
             json.dump(playlists, f)
-    return playlists
+        return {}
 
 def save_playlists(playlists):
     with open("playlists.json", "w") as f:
@@ -281,6 +285,14 @@ async def shuffle_playlist(ctx, name):
         await voice_client.disconnect()
     else:
         await ctx.send("Плейлиста с таким именем не существует.")
+
+@bot.command()
+async def playlist_songs(ctx, name):
+    playlists = load_playlists()
+    if name not in playlists:
+        await ctx.send("Плейлиста с таким именем не существует.")
+    else:
+        await ctx.send(f"Список песен в плейлисте {name}:\n" + "\n".join(playlists[name]))
 
 @bot.command()
 async def help(ctx):
