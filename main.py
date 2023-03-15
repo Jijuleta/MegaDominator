@@ -17,7 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.7.1"
+Version = "2.7.4"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -252,6 +252,16 @@ async def play_playlist(ctx, name):
             while voice_client.is_playing():
                 await asyncio.sleep(1)
         await voice_client.disconnect()
+        
+@bot.command()
+async def delete_playlist(ctx, name):
+    playlists = load_playlists()
+    if name in playlists:
+        del playlists[name]
+        save_playlists(playlists)
+        await ctx.send("Плейлист удалён.")
+    else:
+        await ctx.send("Плейлиста с этим именем не существует.")
 
 @bot.command()
 async def help(ctx):
@@ -271,6 +281,7 @@ async def help(ctx):
     embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
     embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: НАЗВАНИЕ ПЛЕЙЛИСТА ДОЛЖНО СОСТОЯТЬ ИЗ 1 слова.**)", inline=False)
     embed.add_field(name="$play_playlist [playlist title]", value="Воспроизводит плейлист.",inline=False)
+    embed.add_field(name="$delete_playlist [playlist title]", value="Удаляет плейлист.",inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
