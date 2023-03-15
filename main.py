@@ -203,8 +203,55 @@ async def queue(ctx):
 
 # PLAYLISTS MODULE:
 
+# Код немного не дописан.
 
+def load_playlists():
+    if os.path.exists("playlists.json"):
+        with open("playlists.json", "r") as f:
+            playlists = json.load(f)
+    else:
+        playlists = {}
+        with open("playlists.json", "w") as f:
+            json.dump(playlists, f)
+    return playlists
 
+def save_playlists(playlists):
+    with open("playlists.json", "w") as f:
+        json.dump(playlists, f)
+
+@bot.command()
+async def playlists(ctx):
+    playlists = load_playlists()
+    if not playlists:
+        await ctx.send("Нету доступных плейлистов.")
+    else:
+        await ctx.send("Доступные плейлисты:\n" + "\n".join(playlists.keys()))
+
+@bot.command()
+async def create_playlist(ctx, name, *songs):
+    playlists = load_playlists()
+    if name in playlists:
+        await ctx.send("Плейлист с этим именем уже существует.")
+    else:
+        playlists[name] = songs
+        save_playlists(playlists)
+        await ctx.send("Плейлист создан.")
+
+@bot.command()
+async def play_playlist(ctx, name):
+    playlists = load_playlists()
+    if name not in playlists:
+        await ctx.send("Плейлиста с таким именем не существует.")
+    else:
+        await ctx.send("Проигрываю плейлист: " + name)
+        voice_channel = ctx.author.voice.channel
+        voice_client = await voice_channel.connect()
+        for song in playlists[name]:
+            source = FFmpegPCMAudio(f"./media/{song}.mp3")
+            voice_client.play(source)
+            while voice_client.is_playing():
+                await asyncio.sleep(1)
+        await voice_client.disconnect()
 
 @bot.command()
 async def help(ctx):
