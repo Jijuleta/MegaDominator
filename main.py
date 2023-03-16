@@ -18,7 +18,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.8.0"
+Version = "2.8"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -294,6 +294,24 @@ async def playlist_songs(ctx, name):
     else:
         await ctx.send(f"Список песен в плейлисте {name}:\n" + "\n".join(playlists[name]))
 
+
+async def songs_delete(ctx, name, *args):
+    playlists = load_playlists()
+    if name in playlists:
+        deleted_songs = []
+        for song in args:
+            if song in playlists[name]:
+                playlists[name].remove(song)
+                deleted_songs.append(song)
+        if deleted_songs:
+            save_playlists(playlists)
+            await ctx.send(f"Песни {', '.join(deleted_songs)} успешно удалены из плейлиста {name}.")
+        else:
+            await ctx.send(f"Ни одна из указанных песен не найдена в плейлисте {name}.")
+    else:
+        await ctx.send(f"Плейлист {name} не найден.")
+
+
 @bot.command()
 async def songs_add(ctx, name, *args):
     playlists = load_playlists()
@@ -332,6 +350,8 @@ async def help(ctx):
     embed.add_field(name="$delete_playlist [playlist title]", value="Удаляет плейлист.",inline=False)
     embed.add_field(name="$shuffle_playlist [playlist title]", value="Воспроизводит перемешанный плейлист.",inline=False)
     embed.add_field(name="$playlist_songs [playlist title]", value="Выводит список песен в плейлисте.", inline=False)
+    embed.add_field(name='$songs_delete "playlist title" "song" "song2"', value="Удаляет определенную песню из плейлиста. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
+    embed.add_field(name='$songs_add "playlist title" "song" "song2"', value="Добавляет определенную песню из плейлиста. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
