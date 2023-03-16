@@ -19,7 +19,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.8.1"
+Version = "2.8.2"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
