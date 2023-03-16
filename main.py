@@ -295,6 +295,7 @@ async def playlist_songs(ctx, name):
         await ctx.send(f"Список песен в плейлисте {name}:\n" + "\n".join(playlists[name]))
 
 
+@bot.command()
 async def songs_delete(ctx, name, *args):
     playlists = load_playlists()
     if name in playlists:
