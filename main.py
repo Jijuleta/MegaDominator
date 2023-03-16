@@ -294,7 +294,7 @@ async def playlist_songs(ctx, name):
     else:
         await ctx.send(f"Список песен в плейлисте {name}:\n" + "\n".join(playlists[name]))
 
-@bot.command()
+
 async def songs_delete(ctx, name, *args):
     playlists = load_playlists()
     if name in playlists:
@@ -311,6 +311,23 @@ async def songs_delete(ctx, name, *args):
     else:
         await ctx.send(f"Плейлист {name} не найден.")
 
+
+@bot.command()
+async def songs_add(ctx, name, *args):
+    playlists = load_playlists()
+    if name in playlists:
+        added_songs = []
+        for song in args:
+            if song not in playlists[name]:
+                playlists[name].append(song)
+                added_songs.append(song)
+        if added_songs:
+            save_playlists(playlists)
+            await ctx.send(f"Песни {', '.join(added_songs)} успешно добавлены в плейлист {name}.")
+        else:
+            await ctx.send(f"Плейлист {name} не был обновлён.")
+    else:
+        await ctx.send(f"Плейлист {name} не найден.")
 
 @bot.command()
 async def help(ctx):
