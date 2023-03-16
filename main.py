@@ -18,7 +18,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.7.9"
+Version = "2.8.0"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -293,6 +293,23 @@ async def playlist_songs(ctx, name):
         await ctx.send("Плейлиста с таким именем не существует.")
     else:
         await ctx.send(f"Список песен в плейлисте {name}:\n" + "\n".join(playlists[name]))
+
+@bot.command()
+async def songs_add(ctx, name, *args):
+    playlists = load_playlists()
+    if name in playlists:
+        added_songs = []
+        for song in args:
+            if song not in playlists[name]:
+                playlists[name].append(song)
+                added_songs.append(song)
+        if added_songs:
+            save_playlists(playlists)
+            await ctx.send(f"Песни {', '.join(added_songs)} успешно добавлены в плейлист {name}.")
+        else:
+            await ctx.send(f"Плейлист {name} не был обновлён.")
+    else:
+        await ctx.send(f"Плейлист {name} не найден.")
 
 @bot.command()
 async def help(ctx):
