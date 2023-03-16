@@ -5,6 +5,7 @@ import os
 import json
 import re
 import random
+import math
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -18,7 +19,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.8"
+Version = "2.8.1"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -150,9 +151,20 @@ for file_name in audio_files:
 song_queue = deque()
 
 @bot.command()
-async def list(ctx):
-    song_list = '\n'.join([f'{i}. {os.path.splitext(song)[0]}' for i, song in enumerate(audio_files, start=1)])
-    await ctx.send(f'Доступные песни:\n{song_list}')
+async def list(ctx, page: int = 1):
+    songs_per_page = 10
+    num_pages = math.ceil(len(audio_files) / songs_per_page)
+    start_index = (page - 1) * songs_per_page
+    end_index = start_index + songs_per_page
+
+    embed = discord.Embed(title='Доступные песни', color=0x00ff00)
+    for i, song in enumerate(audio_files[start_index:end_index], start=start_index):
+        embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
+
+    if num_pages > 1:
+        embed.set_footer(text=f'Страница {page}/{num_pages}. Для перехода на другую страницу используйте команду $list <page>.')
+
+    await ctx.send(embed=embed)
 
 @bot.command()
 async def play(ctx, *, song_title: str):
