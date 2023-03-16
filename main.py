@@ -299,13 +299,25 @@ async def shuffle_playlist(ctx, name):
         await ctx.send("Плейлиста с таким именем не существует.")
 
 @bot.command()
-async def playlist_songs(ctx, name):
+async def songs_playlist(ctx, name, page: int = 1):
     playlists = load_playlists()
     if name not in playlists:
         await ctx.send("Плейлиста с таким именем не существует.")
     else:
-        await ctx.send(f"Список песен в плейлисте {name}:\n" + "\n".join(playlists[name]))
+        cur_playlist = playlists[name]
+        songs_per_page = 10
+        num_pages = math.ceil(len(cur_playlist) / songs_per_page)
+        start_index = (page - 1) * songs_per_page
+        end_index = start_index + songs_per_page
+        
+        embed = discord.Embed(title='Доступные песни', color=0x00ff00)
+        for i, song in enumerate(cur_playlist[start_index:end_index], start=start_index):
+            embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
 
+        if num_pages > 1:
+            embed.set_footer(text=f'Страница {page}/{num_pages}. Для перехода на другую страницу используйте команду $playlist <name> <page>.')
+
+        await ctx.send(embed=embed)
 
 @bot.command()
 async def songs_delete(ctx, name, *args):
@@ -362,7 +374,7 @@ async def help(ctx):
     embed.add_field(name="$play_playlist [playlist title]", value="Воспроизводит плейлист.",inline=False)
     embed.add_field(name="$delete_playlist [playlist title]", value="Удаляет плейлист.",inline=False)
     embed.add_field(name="$shuffle_playlist [playlist title]", value="Воспроизводит перемешанный плейлист.",inline=False)
-    embed.add_field(name="$playlist_songs [playlist title]", value="Выводит список песен в плейлисте.", inline=False)
+    embed.add_field(name="$songs_playlist [playlist title]", value="Выводит список песен в плейлисте.", inline=False)
     embed.add_field(name='$songs_delete "playlist title" "song" "song2"', value="Удаляет определенную песню из плейлиста. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
     embed.add_field(name='$songs_add "playlist title" "song" "song2"', value="Добавляет определенную песню из плейлиста. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
