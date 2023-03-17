@@ -176,7 +176,7 @@ async def show_song_list(ctx, page):
             try:
                 reaction, user = await bot.wait_for('reaction_add', timeout=30.0, check=check)
             except asyncio.TimeoutError:
-                break
+                await message.clear_reactions()
             else:
                 if str(reaction.emoji) == '⬅️':
                     current_page = max(1, current_page - 1)
