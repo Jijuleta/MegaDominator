@@ -157,7 +157,7 @@ async def show_song_list(ctx, page):
     start_index = (page - 1) * SONGS_PER_PAGE
     end_index = start_index + SONGS_PER_PAGE
 
-    embed = discord.Embed(title='Доступные песни', color=0x00ff00)
+    embed = discord.Embed(title='Доступные песни:', color=0x00ff00)
     for i, song in enumerate(audio_files[start_index:end_index], start=start_index):
         embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
 
@@ -343,7 +343,7 @@ async def show_song_playlist(ctx, name, page):
     start_index = (page - 1) * SONGS_PER_PAGE
     end_index = start_index + SONGS_PER_PAGE
 
-    embed = discord.Embed(title='Доступные песни', color=0x00ff00)
+    embed = discord.Embed(title='Песни в плейлисте:', color=0x00ff00)
     for i, song in enumerate(cur_playlist[start_index:end_index], start=start_index):
         embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
 
