@@ -335,26 +335,58 @@ async def shuffle_playlist(ctx, name):
     else:
         await ctx.send("Плейлиста с таким именем не существует.")
 
+async def show_song_playlist(ctx, name, page):
+    playlists = load_playlists()
+    cur_playlist = playlists[name]
+    num_pages = math.ceil(len(cur_playlist) / SONGS_PER_PAGE)
+    
+    start_index = (page - 1) * SONGS_PER_PAGE
+    end_index = start_index + SONGS_PER_PAGE
+
+    embed = discord.Embed(title='Доступные песни', color=0x00ff00)
+    for i, song in enumerate(cur_playlist[start_index:end_index], start=start_index):
+        embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
+
+    embed.set_footer(text=f'Страница {page}/{num_pages}. Для перехода на другую страницу используйте реакции ⬅️ и ➡️.')
+    message = await ctx.send(embed=embed)
+
+    if num_pages > 1:
+        await message.add_reaction('⬅️')
+        await message.add_reaction('➡️')
+
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in ['⬅️', '➡️']
+
+        current_page = page
+        while True:
+            try:
+                reaction, user = await bot.wait_for('reaction_add', timeout=30.0, check=check)
+            except asyncio.TimeoutError:
+                await message.clear_reactions()
+                break
+            else:
+                if str(reaction.emoji) == '⬅️':
+                    current_page = max(1, current_page - 1)
+                elif str(reaction.emoji) == '➡️':
+                    current_page = min(num_pages, current_page + 1)
+
+                await message.remove_reaction(reaction, user)
+
+                if current_page != page:
+                    page = current_page
+                    start_index = (page - 1) * SONGS_PER_PAGE
+                    end_index = start_index + SONGS_PER_PAGE
+
+                    embed.clear_fields()
+                    for i, song in enumerate(cur_playlist[start_index:end_index], start=start_index):
+                        embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
+
+                    embed.set_footer(text=f'Страница {page}/{num_pages}. Для перехода на другую страницу используйте реакции ⬅️ и ➡️.')
+                    await message.edit(embed=embed)
+
 @bot.command()
 async def songs_playlist(ctx, name, page: int = 1):
-    playlists = load_playlists()
-    if name not in playlists:
-        await ctx.send("Плейлиста с таким именем не существует.")
-    else:
-        cur_playlist = playlists[name]
-        songs_per_page = 10
-        num_pages = math.ceil(len(cur_playlist) / songs_per_page)
-        start_index = (page - 1) * songs_per_page
-        end_index = start_index + songs_per_page
-        
-        embed = discord.Embed(title='Доступные песни', color=0x00ff00)
-        for i, song in enumerate(cur_playlist[start_index:end_index], start=start_index):
-            embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
-
-        if num_pages > 1:
-            embed.set_footer(text=f'Страница {page}/{num_pages}. Для перехода на другую страницу используйте команду $playlist <name> <page>.')
-
-        await ctx.send(embed=embed)
+    await show_song_playlist(ctx, name, page)
 
 @bot.command()
 async def songs_delete(ctx, name, *args):
