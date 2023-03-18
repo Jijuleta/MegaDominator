@@ -254,8 +254,10 @@ async def stop(ctx):
         await ctx.send('Ничего не проигрывается.')
 
 @bot.command()
-#@commands.has_permissions(administrator=True)
-async def songs_upload(ctx, file_name: str):
+async def songs_upload(ctx, *, args: str):
+    file_name, *rest = args.split(",")
+    title = ", ".join(rest).strip()
+
     if not ctx.message.attachments:
         await ctx.send("Пожалуйста, прикрепите файл MP3 к вашему сообщению.")
         return
@@ -272,7 +274,8 @@ async def songs_upload(ctx, file_name: str):
     file_path = f"./media/{file_name}.mp3"
     await attachment.save(file_path)
 
-    await ctx.send(f"Файл {attachment.filename} был успешно сохранен как {file_name}.mp3.")
+    await ctx.send(f"Файл был успешно сохранен как '{title}'.")
+
 
 """@songs_upload.error
 async def songs_upload_error(ctx, error):
