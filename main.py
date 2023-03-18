@@ -6,6 +6,7 @@ import json
 import re
 import random
 import math
+import requests
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -19,7 +20,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.8.3"
+Version = "2.8.4"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -28,6 +29,31 @@ async def on_ready():
     print('------')
     activity = discord.Activity(name=f'Version {Version}', type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def update(ctx):
+    url = 'https://raw.githubusercontent.com/Jijuleta/MegaDominator/master/main.py'
+    
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        with open('new_main.py', 'wb') as f:
+            f.write(response.content)
+        
+        await bot.close()
+        
+        os.replace('new_main.py', 'main.py')
+        
+        os.system('python main.py')
+        
+    else:
+        await ctx.send('Не удалось выполнить обновление бота.')
+
+@update.error
+async def update_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
 
 @bot.command()
 #@commands.has_permissions(administrator=True)
@@ -252,6 +278,32 @@ async def stop(ctx):
         await voice_client.disconnect()
     else:
         await ctx.send('Ничего не проигрывается.')
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def songs_upload(ctx):
+    if not ctx.message.attachments:
+        await ctx.send("Пожалуйста, прикрепите файл MP3 к вашему сообщению.")
+        return
+
+    attachment = ctx.message.attachments[0]
+
+    if not attachment.filename.endswith(".mp3"):
+        await ctx.send("Пожалуйста, прикрепите файл MP3 к вашему сообщению.")
+        return
+
+    if not os.path.exists("./media"):
+        os.mkdir("./media")
+
+    file_path = f"./media/{attachment.filename}"
+    await attachment.save(file_path)
+
+    await ctx.send(f"Файл {attachment.filename} был успешно сохранен.")
+
+@songs_upload.error
+async def songs_upload_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
 
 # PLAYLISTS MODULE:
 
