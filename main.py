@@ -256,9 +256,7 @@ async def stop(ctx):
 @bot.command()
 #@commands.has_permissions(administrator=True)
 async def songs_upload(ctx, *, file_name: str):
-    artist_title, ext = os.path.splitext(file_name)
-    artist_title = artist_title.strip('"')
-    new_file_name = f"{artist_title}{ext}"
+    artist_title = file_name.strip('"')
 
     if not ctx.message.attachments:
         await ctx.send("Пожалуйста, прикрепите файл MP3 к вашему сообщению.")
@@ -273,10 +271,12 @@ async def songs_upload(ctx, *, file_name: str):
     if not os.path.exists("./media"):
         os.mkdir("./media")
 
+    new_file_name = f"{artist_title}.mp3"
     file_path = f"./media/{new_file_name}"
     await attachment.save(file_path)
 
     await ctx.send(f"Файл был успешно сохранен как '{artist_title}'.")
+
 
 
 """@songs_upload.error
