@@ -3,4 +3,5 @@ import sys
 
 os.replace('new_main.py', 'main.py')
 
-os.execv(sys.executable, ['python'] + sys.argv)
+python = sys.executable
+os.execl(python, python, *sys.argv)
