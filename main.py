@@ -19,7 +19,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.8.4"
+Version = "2.8.5"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -255,7 +255,7 @@ async def stop(ctx):
 
 @bot.command()
 @commands.has_permissions(administrator=True)
-async def songs_upload(ctx):
+async def songs_upload(ctx, file_name: str):
     if not ctx.message.attachments:
         await ctx.send("Пожалуйста, прикрепите файл MP3 к вашему сообщению.")
         return
@@ -269,10 +269,10 @@ async def songs_upload(ctx):
     if not os.path.exists("./media"):
         os.mkdir("./media")
 
-    file_path = f"./media/{attachment.filename}"
+    file_path = f"./media/{file_name}.mp3"
     await attachment.save(file_path)
 
-    await ctx.send(f"Файл {attachment.filename} был успешно сохранен.")
+    await ctx.send(f"Файл {attachment.filename} был успешно сохранен как {file_name}.mp3.")
 
 @songs_upload.error
 async def songs_upload_error(ctx, error):
