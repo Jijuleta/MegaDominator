@@ -11,8 +11,6 @@ if response.status_code == 200:
 
     os.replace('new_main.py', 'main.py')
 
-    os.remove('new_main.py')
-
     print('Обновление успешно завершено.')
 else:
     print('Ошибка обновления.')
