@@ -1,21 +1,24 @@
 import requests
 import os
+import logging
 
-url = 'https://raw.githubusercontent.com/Jijuleta/MegaDominator/master/main.py'
+logging.basicConfig(filename='update.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-response = requests.get(url)
+url = 'https://raw.githubusercontent.com/<username>/<repository>/<branch>/main.py'
 
-if response.status_code == 200:
-    with open('new_main.py', 'wb') as f:
-        f.write(response.content)
+try:
+    response = requests.get(url)
 
-    os.replace('new_main.py', 'main.py')
+    if response.status_code == 200:
+        with open('new_main.py', 'wb') as f:
+            f.write(response.content)
 
-    print('Обновление успешно завершено.')
-else:
-    print('Ошибка обновления.')
+        os.replace('new_main.py', 'main.py')
 
-
-
-
-
+        logging.info('Успешное обновление.')
+    else:
+        logging.error('Не удалось скачать обновление.')
+        print('Обновление не удалось.')
+except requests.exceptions.RequestException as e:
+    logging.error(f'Ошибка запроса: {e}')
+    print('Обновление не удалось..')
