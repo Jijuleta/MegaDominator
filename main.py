@@ -7,6 +7,7 @@ import re
 import random
 import math
 import requests
+import sys
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -31,24 +32,21 @@ async def on_ready():
     await bot.change_presence(activity=activity)
 
 @bot.command()
-@commands.has_permissions(administrator=True)
 async def update(ctx):
     url = 'https://raw.githubusercontent.com/Jijuleta/MegaDominator/master/main.py'
-    
+
     response = requests.get(url)
-    
+
     if response.status_code == 200:
         with open('new_main.py', 'wb') as f:
             f.write(response.content)
-        
+
         await bot.close()
-        
-        os.replace('new_main.py', 'main.py')
-        
-        os.system('python main.py')
-        
+
+        os.system('python update_bot.py')
+
     else:
-        await ctx.send('Не удалось выполнить обновление бота.')
+        await ctx.send('Не удалось обновить бота.')
 
 @update.error
 async def update_error(ctx, error):
