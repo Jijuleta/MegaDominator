@@ -254,7 +254,7 @@ async def stop(ctx):
         await ctx.send('Ничего не проигрывается.')
 
 @bot.command()
-@commands.has_permissions(administrator=True)
+#@commands.has_permissions(administrator=True)
 async def songs_upload(ctx, file_name: str):
     if not ctx.message.attachments:
         await ctx.send("Пожалуйста, прикрепите файл MP3 к вашему сообщению.")
@@ -274,10 +274,10 @@ async def songs_upload(ctx, file_name: str):
 
     await ctx.send(f"Файл {attachment.filename} был успешно сохранен как {file_name}.mp3.")
 
-@songs_upload.error
+"""@songs_upload.error
 async def songs_upload_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
 
 # PLAYLISTS MODULE:
 
@@ -464,7 +464,7 @@ async def help(ctx):
     embed.add_field(name="$play [song title]", value="Воспроизводит выбранную песню.", inline=False)
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
     embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
-    embed.add_field(name="$songs_upload [song title]", value='Позволяет загрузить MP3 файл в папку с музыкой.(**NOTE: К сообщению нужно прикрепить файл**) (требуются админ права)',inline=False)
+    embed.add_field(name="$songs_upload [song title]", value='Позволяет загрузить MP3 файл в папку с музыкой.(**NOTE: К сообщению нужно прикрепить файл**)',inline=False)
     embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
     embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: НАЗВАНИЕ ПЛЕЙЛИСТА ДОЛЖНО СОСТОЯТЬ ИЗ 1 слова.**)", inline=False)
     embed.add_field(name="$play_playlist [playlist title]", value="Воспроизводит плейлист.",inline=False)
