@@ -14,7 +14,6 @@ from typing import Union
 from collections import deque
 
 # u have to create config.py and create API_TOKEN variable.
-# yes.
 
 intents = discord.Intents.default()
 intents.members = True
