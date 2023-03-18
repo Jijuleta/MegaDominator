@@ -6,8 +6,6 @@ import json
 import re
 import random
 import math
-import requests
-import sys
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -30,28 +28,6 @@ async def on_ready():
     print('------')
     activity = discord.Activity(name=f'Version {Version}', type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
-
-@bot.command()
-async def update(ctx):
-    url = 'https://raw.githubusercontent.com/Jijuleta/MegaDominator/master/main.py'
-
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        with open('new_main.py', 'wb') as f:
-            f.write(response.content)
-
-        await bot.close()
-
-        os.system('python update_bot.py')
-
-    else:
-        await ctx.send('Не удалось обновить бота.')
-
-@update.error
-async def update_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
 
 @bot.command()
 #@commands.has_permissions(administrator=True)
