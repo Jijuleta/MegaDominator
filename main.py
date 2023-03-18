@@ -464,7 +464,7 @@ async def help(ctx):
     embed.add_field(name="$play [song title]", value="Воспроизводит выбранную песню.", inline=False)
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
     embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
-    embed.add_field(name="$songs_upload", value='Позволяет загрузить MP3 файл в папку с музыкой.(**NOTE: К сообщению нужно прикрепить файл**) (требуются админ права)',inline=False)
+    embed.add_field(name="$songs_upload [song title]", value='Позволяет загрузить MP3 файл в папку с музыкой.(**NOTE: К сообщению нужно прикрепить файл**) (требуются админ права)',inline=False)
     embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
     embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: НАЗВАНИЕ ПЛЕЙЛИСТА ДОЛЖНО СОСТОЯТЬ ИЗ 1 слова.**)", inline=False)
     embed.add_field(name="$play_playlist [playlist title]", value="Воспроизводит плейлист.",inline=False)
