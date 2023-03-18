@@ -141,7 +141,7 @@ async def id(ctx, user: Union[discord.Member, int]):
 # MUSIC FEATURES
 
 MUSIC_LIBRARY_PATH = './media/'
-audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3', '.wav', '.ogg'))]
+audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3'))]
 
 song_dict = {}
 for file_name in audio_files:
@@ -275,6 +275,7 @@ async def songs_upload(ctx, *, file_name: str):
     file_path = f"./media/{new_file_name}"
     await attachment.save(file_path)
 
+    song_dict[artist_title] = file_path
     await ctx.send(f"Файл был успешно сохранен как '{artist_title}'.")
 
 
