@@ -19,7 +19,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.8.8"
+Version = "2.8.7"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -308,20 +308,6 @@ def load_playlists(playlist_name=None):
             json.dump(playlists, f)
         return {}
 
-def load_names():
-    names_list = []
-    if os.path.exists("playlists.json"):
-        with open("playlists.json", "r") as f:
-            playlists = json.load(f)
-            for key in playlists.keys():
-                names_list.append(key)
-            return names_list
-    else:
-        playlists = {}
-        with open("playlists.json", "w") as f:
-            json.dump(playlists, f)
-        return {}
-
 def save_playlists(playlists):
     with open("playlists.json", "w") as f:
         json.dump(playlists, f)
@@ -374,12 +360,12 @@ async def show_playlists(ctx, page):
                     await message.edit(embed=embed)
 
 @bot.command()
-async def playlists(ctx, page: int = 1):
+async def playlists(ctx):
     playlists = load_playlists()
     if not playlists:
         await ctx.send("Нету доступных плейлистов.")
     else:
-        await show_playlists(ctx, page)
+        await ctx.send("Доступные плейлисты:\n" + "\n".join(playlists.keys()))
 
 @bot.command()
 async def create_playlist(ctx, name, *songs):
