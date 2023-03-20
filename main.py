@@ -19,7 +19,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.8.6"
+Version = "2.8.7"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -103,12 +103,12 @@ async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChanne
     await ctx.send(f"Пользователь {user.name} был перемещен между {channel.name} и {original_channel.name} {num_moves} раз.")
 
 
-@bot.command()
+'''@bot.command()
 async def chngrpc(ctx, *, rpc_name: str):
     activity = discord.Activity(name=rpc_name, type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
     print(f"Changed Rich Presence to: {rpc_name}")
-    await ctx.send(f"Rich Presence был изменен на: {rpc_name}")
+    await ctx.send(f"Rich Presence был изменен на: {rpc_name}")'''
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -142,6 +142,10 @@ async def id(ctx, user: Union[discord.Member, int]):
 
 MUSIC_LIBRARY_PATH = './media/'
 audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3'))]
+
+async def change_rpc(s: str):
+    act = discord.Activity(name=s, type=discord.ActivityType.watching, details="Watching", state="Discord")
+    await bot.change_presence(activity=act)
 
 song_dict = {}
 for file_name in audio_files:
@@ -220,9 +224,10 @@ async def play(ctx, *, song_title: str):
         song_queue.append(song_path)
         await ctx.send(f'{song_title} добавлена в очередь.')
     else:
+        await ctx.send(f"Проигрывается песня: {song_title}")
         audio_source = discord.FFmpegPCMAudio(song_path)
         voice_client.play(audio_source)
-
+        await change_rpc(f'{song_title}')
         while voice_client.is_playing():
             await asyncio.sleep(1)
 
@@ -230,7 +235,9 @@ async def play(ctx, *, song_title: str):
             next_song_path = song_queue.popleft()
             next_song_title = os.path.splitext(os.path.basename(next_song_path))[0]
             voice_client.play(discord.FFmpegPCMAudio(next_song_path), after=lambda e: asyncio.run_coroutine_threadsafe(play(ctx, next_song_title), bot.loop))
+            await change_rpc(f'{next_song_title}')
         else:
+            await change_rpc(f'Version {Version}')
             await voice_client.disconnect()
 
 @bot.command()
@@ -249,6 +256,7 @@ async def stop(ctx):
             await ctx.send('Останавливаю воспроизведение музыки.')
             voice_client.stop()
         song_queue.clear()
+        await change_rpc(f'Version {Version}')
         await voice_client.disconnect()
     else:
         await ctx.send('Ничего не проигрывается.')
@@ -277,7 +285,6 @@ async def songs_upload(ctx, *, file_name: str):
 
     song_dict[artist_title] = file_path
     await ctx.send(f"Файл был успешно сохранен как '{artist_title}'.")
-
 
 
 """@songs_upload.error
@@ -335,8 +342,10 @@ async def play_playlist(ctx, name):
         for song in playlists[name]:
             source = FFmpegPCMAudio(f"./media/{song}.mp3")
             voice_client.play(source)
+            await change_rpc(f'{song}')
             while voice_client.is_playing():
                 await asyncio.sleep(1)
+        await change_rpc(f'Version {Version}')
         await voice_client.disconnect()
         
 @bot.command()
@@ -361,8 +370,10 @@ async def shuffle_playlist(ctx, name):
         for song in cur_playlist:
             source = FFmpegPCMAudio(f"./media/{song}.mp3")
             voice_client.play(source)
+            await change_rpc(f'{song}')
             while voice_client.is_playing():
                 await asyncio.sleep(1)
+        await change_rpc(f'Version {Version}')
         await voice_client.disconnect()
     else:
         await ctx.send("Плейлиста с таким именем не существует.")
@@ -461,7 +472,6 @@ async def help(ctx):
     embed.add_field(name="$dmbomb [times] [user_id] [message]", value="Отправить сообщение в личку определенное количество раз.", inline=False)
     embed.add_field(name="$chbomb [times] [user_id]", value="Создать временный канал, где человек будет тегнут определенное количество раз.", inline=False)
     embed.add_field(name="$spmove [num_moves] [user_id] [channel]", value="Супер-перемещение между оригинальным и указанным каналом.", inline=False)
-    embed.add_field(name="$chngrpc [rpc_name]", value="Поменять Rich Presence бота.", inline=False)
     embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
     embed.add_field(name="$id [@user] or [user id]", value="При умоминании пользователя выводит его ID, если отправить ID пользователя, то бот отправит владельца ID.")
     embed.add_field(name=" ",value=" ", inline=False)
