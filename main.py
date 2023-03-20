@@ -495,7 +495,7 @@ async def songs_playlist(ctx, name, page: int = 1):
 @bot.command()
 async def songs_delete(ctx, name, *args):
     playlists = load_playlists()
-    if name in playlists:
+    if name in playlists: #SRTH MKLAWGTR ;/KLBATW4K'OP;TEBRSJLBWPM'3;K/NJE2K/QL;JHIKUQR2BIQEB2HNLI3QRGKILPKERGVJN
         deleted_songs = []
         for song in args:
             if song in playlists[name]:
