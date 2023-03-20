@@ -33,7 +33,7 @@ async def on_ready():
 #@commands.has_permissions(administrator=True)
 async def dmbomb(ctx, times: int, user_id: int, *, message: str):
     if times > 100:
-        await ctx.send("Максимальное количество перемещений - 100.")
+        await ctx.send("Максимальное количество сообщений - 100.")
         return
     user = bot.get_user(user_id)
     if user is None:
@@ -59,7 +59,7 @@ async def dmbomb_error(ctx, error):
 #@commands.has_permissions(administrator=True)
 async def chbomb(ctx, times: int, user_id: int):
     if times > 100:
-        await ctx.send("Максимальное количество перемещений - 100.")
+        await ctx.send("Максимальное количество сообщений - 100.")
         return
     user = bot.get_user(user_id)
     if user is None:
@@ -114,7 +114,7 @@ async def chngrpc(ctx, *, rpc_name: str):
 @commands.has_permissions(administrator=True)
 async def purge(ctx, limit: int):
     if limit > 100:
-        await ctx.send("Максимальное количество перемещений - 100.")
+        await ctx.send("Максимальное количество удалений - 100.")
         return
     deleted = await ctx.channel.purge(limit=limit+1)
     await ctx.send(f"{len(deleted) - 1} сообщений было успешно удалено!")
