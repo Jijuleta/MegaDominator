@@ -312,6 +312,53 @@ def save_playlists(playlists):
     with open("playlists.json", "w") as f:
         json.dump(playlists, f)
 
+async def show_playlists(ctx, page):
+    names = load_names()
+    num_pages = math.ceil(len(names) / SONGS_PER_PAGE)
+    start_index = (page - 1) * SONGS_PER_PAGE
+    end_index = start_index + SONGS_PER_PAGE
+
+    embed = discord.Embed(title='Доступные плейлисты:', color=0x00ff00)
+    for i, song in enumerate(names[start_index:end_index], start=start_index):
+        embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
+
+    embed.set_footer(text=f'Страница {page}/{num_pages}. Для перехода на другую страницу используйте реакции ⬅️ и ➡️.')
+    message = await ctx.send(embed=embed)
+
+    if num_pages > 1:
+        await message.add_reaction('⬅️')
+        await message.add_reaction('➡️')
+
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in ['⬅️', '➡️']
+
+        current_page = page
+        while True:
+            try:
+                reaction, user = await bot.wait_for('reaction_add', timeout=30.0, check=check)
+            except asyncio.TimeoutError:
+                await message.clear_reactions()
+                break
+            else:
+                if str(reaction.emoji) == '⬅️':
+                    current_page = max(1, current_page - 1)
+                elif str(reaction.emoji) == '➡️':
+                    current_page = min(num_pages, current_page + 1)
+
+                await message.remove_reaction(reaction, user)
+
+                if current_page != page:
+                    page = current_page
+                    start_index = (page - 1) * SONGS_PER_PAGE
+                    end_index = start_index + SONGS_PER_PAGE
+
+                    embed.clear_fields()
+                    for i, song in enumerate(names[start_index:end_index], start=start_index):
+                        embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
+
+                    embed.set_footer(text=f'Страница {page}/{num_pages}. Для перехода на другую страницу используйте реакции ⬅️ и ➡️.')
+                    await message.edit(embed=embed)
+
 @bot.command()
 async def playlists(ctx):
     playlists = load_playlists()
