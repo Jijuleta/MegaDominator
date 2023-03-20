@@ -19,7 +19,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.8.8"
+Version = "2.8.7"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -33,7 +33,7 @@ async def on_ready():
 #@commands.has_permissions(administrator=True)
 async def dmbomb(ctx, times: int, user_id: int, *, message: str):
     if times > 100:
-        await ctx.send("Максимальное количество перемещений - 100.")
+        await ctx.send("Максимальное количество сообщений - 100.")
         return
     user = bot.get_user(user_id)
     if user is None:
@@ -59,7 +59,7 @@ async def dmbomb_error(ctx, error):
 #@commands.has_permissions(administrator=True)
 async def chbomb(ctx, times: int, user_id: int):
     if times > 100:
-        await ctx.send("Максимальное количество перемещений - 100.")
+        await ctx.send("Максимальное количество сообщений - 100.")
         return
     user = bot.get_user(user_id)
     if user is None:
@@ -114,7 +114,7 @@ async def chngrpc(ctx, *, rpc_name: str):
 @commands.has_permissions(administrator=True)
 async def purge(ctx, limit: int):
     if limit > 100:
-        await ctx.send("Максимальное количество перемещений - 100.")
+        await ctx.send("Максимальное количество удалений - 100.")
         return
     deleted = await ctx.channel.purge(limit=limit+1)
     await ctx.send(f"{len(deleted) - 1} сообщений было успешно удалено!")
@@ -308,20 +308,6 @@ def load_playlists(playlist_name=None):
             json.dump(playlists, f)
         return {}
 
-def load_names():
-    names_list = []
-    if os.path.exists("playlists.json"):
-        with open("playlists.json", "r") as f:
-            playlists = json.load(f)
-            for key in playlists.keys():
-                names_list.append(key)
-            return names_list
-    else:
-        playlists = {}
-        with open("playlists.json", "w") as f:
-            json.dump(playlists, f)
-        return {}
-
 def save_playlists(playlists):
     with open("playlists.json", "w") as f:
         json.dump(playlists, f)
@@ -374,12 +360,12 @@ async def show_playlists(ctx, page):
                     await message.edit(embed=embed)
 
 @bot.command()
-async def playlists(ctx, page: int = 1):
+async def playlists(ctx):
     playlists = load_playlists()
     if not playlists:
         await ctx.send("Нету доступных плейлистов.")
     else:
-        await show_playlists(ctx, page)
+        await ctx.send("Доступные плейлисты:\n" + "\n".join(playlists.keys()))
 
 @bot.command()
 async def create_playlist(ctx, name, *songs):
@@ -553,6 +539,7 @@ async def help(ctx):
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
+    embed.add_field(name="Соавтор бота:", value="**ABrusil**", inline=False)
     embed.add_field(name="VERSION:", value= f'{Version}', inline=False)
     await ctx.send(embed=embed)
 
