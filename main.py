@@ -328,6 +328,7 @@ def save_playlists(playlists):
 
 async def show_playlists(ctx, page):
     names = load_names()
+    num_pages = math.ceil(len(names) / SONGS_PER_PAGE)
     start_index = (page - 1) * SONGS_PER_PAGE
     end_index = start_index + SONGS_PER_PAGE
 
