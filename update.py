@@ -2,7 +2,7 @@ import requests
 import os
 
 def update():
-    url = 'https://raw.githubusercontent.com/Jijuleta/MegaDominator/master/main.py'
+    url = 'https://raw.githubusercontent.com/Theuridon/MegaDominator/master/main.py'
     code = requests.get(url)
     if code.status_code == 200:
         with open('new_main.py', 'wb') as f:
