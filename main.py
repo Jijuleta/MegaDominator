@@ -473,6 +473,7 @@ async def help(ctx):
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
+    embed.add_field(name="Соавтор:", value="**ABrusil**",inline=False)
     embed.add_field(name="VERSION:", value= f'{Version}', inline=False)
     await ctx.send(embed=embed)
 
