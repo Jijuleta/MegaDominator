@@ -15,6 +15,10 @@
 
 Инструкция по установке:
 - https://www.hostinger.com/tutorials/how-to-install-ffmpeg
+
+Для Docker используйте:
+- RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg
+
 # ЛЮТАЯ МУЗЫКАЛЬНАЯ БИБЛИОТЕКА:
 Папку скидывать в корень программы.
 - https://drive.google.com/drive/folders/11oTtbKapsU6ZvEkZgFz-frncZ5zedPxK?usp=sharing
