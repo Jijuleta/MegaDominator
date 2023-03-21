@@ -3,7 +3,6 @@ import datetime
 import asyncio
 import os
 import json
-import re
 import random
 import math
 from discord import FFmpegPCMAudio
@@ -19,7 +18,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.9"
+Version = "2.9.1"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -348,7 +347,7 @@ async def create_playlist(ctx, name, *songs):
         await ctx.send("Плейлист создан.")
 
 @bot.command()
-async def play_playlist(ctx, name):
+async def play_playlist(ctx, name, loop=False):
     playlists = load_playlists()
     if name not in playlists:
         await ctx.send("Плейлиста с таким именем не существует.")
@@ -356,12 +355,18 @@ async def play_playlist(ctx, name):
         await ctx.send("Проигрываю плейлист: " + name)
         voice_channel = ctx.author.voice.channel
         voice_client = await voice_channel.connect()
-        for song in playlists[name]:
-            source = FFmpegPCMAudio(f"./media/{song}.mp3")
-            voice_client.play(source)
-            await change_rpc(f'{song}')
-            while voice_client.is_playing():
-                await asyncio.sleep(1)
+        cur_playlist = playlists[name]
+        while True:
+            if loop:
+                random.shuffle(cur_playlist)
+            for song in cur_playlist:
+                source = FFmpegPCMAudio(f"./media/{song}.mp3")
+                voice_client.play(source)
+                await change_rpc(f'{song}')
+                while voice_client.is_playing():
+                    await asyncio.sleep(1)
+            if not loop:
+                break
         await change_rpc(f'Version {Version}')
         await voice_client.disconnect()
         
@@ -376,22 +381,26 @@ async def delete_playlist(ctx, name):
         await ctx.send("Плейлиста с таким именем не существует.")
         
 @bot.command()
-async def shuffle_playlist(ctx, name):
+async def shuffle_playlist(ctx, name, loop=False):
     playlists = load_playlists()
     if name in playlists:
         cur_playlist = playlists[name]
-        random.shuffle(cur_playlist)
-        await ctx.send("Проигрываю перемешанный плейлист: " + name)
-        voice_channel = ctx.author.voice.channel
-        voice_client = await voice_channel.connect()
-        for song in cur_playlist:
-            source = FFmpegPCMAudio(f"./media/{song}.mp3")
-            voice_client.play(source)
-            await change_rpc(f'{song}')
-            while voice_client.is_playing():
-                await asyncio.sleep(1)
-        await change_rpc(f'Version {Version}')
-        await voice_client.disconnect()
+        while True:
+            if loop:
+                random.shuffle(cur_playlist)
+            await ctx.send("Проигрываю перемешанный плейлист: " + name)
+            voice_channel = ctx.author.voice.channel
+            voice_client = await voice_channel.connect()
+            for song in cur_playlist:
+                source = FFmpegPCMAudio(f"./media/{song}.mp3")
+                voice_client.play(source)
+                await change_rpc(f'{song}')
+                while voice_client.is_playing():
+                    await asyncio.sleep(1)
+            await change_rpc(f'Version {Version}')
+            await voice_client.disconnect()
+            if not loop:
+                break
     else:
         await ctx.send("Плейлиста с таким именем не существует.")
 
@@ -455,15 +464,16 @@ async def help(ctx):
     embed.add_field(name='$songs_upload "song title without extension"', value='Позволяет загрузить MP3 файл в папку с музыкой.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: К сообщению нужно прикрепить файл**)',inline=False)
     embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
     embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: НАЗВАНИЕ ПЛЕЙЛИСТА ДОЛЖНО СОСТОЯТЬ ИЗ 1 слова.**)", inline=False)
-    embed.add_field(name="$play_playlist [playlist title]", value="Воспроизводит плейлист.",inline=False)
+    embed.add_field(name="$play_playlist [playlist title] [НЕОБЯЗАТЕЛЬНО: True (тогда плейлист будет играть снова)]", value="Воспроизводит плейлист.",inline=False)
     embed.add_field(name="$delete_playlist [playlist title]", value="Удаляет плейлист.",inline=False)
-    embed.add_field(name="$shuffle_playlist [playlist title]", value="Воспроизводит перемешанный плейлист.",inline=False)
+    embed.add_field(name="$shuffle_playlist [playlist title] [НЕОБЯЗАТЕЛЬНО: True (тогда плейлист будет играть снова)]", value="Воспроизводит перемешанный плейлист.",inline=False)
     embed.add_field(name="$songs_playlist [playlist title]", value="Выводит список песен в плейлисте.", inline=False)
     embed.add_field(name='$songs_delete "playlist title" "song" "song2"', value="Удаляет определенную песню из плейлиста. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
     embed.add_field(name='$songs_add "playlist title" "song" "song2"', value="Добавляет определенную песню из плейлиста. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
+    embed.add_field(name="Соавтор:", value="**ABrusil**",inline=False)
     embed.add_field(name="VERSION:", value= f'{Version}', inline=False)
     await ctx.send(embed=embed)
 
