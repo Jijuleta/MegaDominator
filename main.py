@@ -18,7 +18,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.9.2"
+Version = "2.9.1"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -357,6 +357,8 @@ async def play_playlist(ctx, name, loop=False):
         voice_client = await voice_channel.connect()
         cur_playlist = playlists[name]
         while True:
+            if loop:
+                random.shuffle(cur_playlist)
             for song in cur_playlist:
                 source = FFmpegPCMAudio(f"./media/{song}.mp3")
                 voice_client.play(source)
@@ -382,22 +384,23 @@ async def delete_playlist(ctx, name):
 async def shuffle_playlist(ctx, name, loop=False):
     playlists = load_playlists()
     if name in playlists:
-        voice_channel = ctx.author.voice.channel
-        voice_client = await voice_channel.connect()
         cur_playlist = playlists[name]
         while True:
             if loop:
                 random.shuffle(cur_playlist)
+            await ctx.send("Проигрываю перемешанный плейлист: " + name)
+            voice_channel = ctx.author.voice.channel
+            voice_client = await voice_channel.connect()
             for song in cur_playlist:
                 source = FFmpegPCMAudio(f"./media/{song}.mp3")
                 voice_client.play(source)
                 await change_rpc(f'{song}')
                 while voice_client.is_playing():
                     await asyncio.sleep(1)
+            await change_rpc(f'Version {Version}')
+            await voice_client.disconnect()
             if not loop:
                 break
-        await change_rpc(f'Version {Version}')
-        await voice_client.disconnect()
     else:
         await ctx.send("Плейлиста с таким именем не существует.")
 
