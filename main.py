@@ -385,6 +385,7 @@ async def shuffle_playlist(ctx, name, loop=False):
         voice_channel = ctx.author.voice.channel
         voice_client = await voice_channel.connect()
         cur_playlist = playlists[name]
+        await ctx.send("Проигрываю перемешанный плейлист: " + name)
         while True:
             if loop:
                 random.shuffle(cur_playlist)
