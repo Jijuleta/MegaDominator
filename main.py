@@ -295,6 +295,7 @@ async def songs_upload_error(ctx, error):
         await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
 
 @bot.command()
+#@commands.has_permissions(administrator=True)
 async def download(ctx, url: str, name: str):
     try:
         video = pytube.YouTube(url)
@@ -312,8 +313,10 @@ async def download(ctx, url: str, name: str):
     except Exception as e:
         print(f'Error: {e}')
 
-
-# PLAYLISTS MODULE:
+"""@download.error
+async def download_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
 
 def load_playlists(playlist_name=None):
     if os.path.exists("playlists.json"):
