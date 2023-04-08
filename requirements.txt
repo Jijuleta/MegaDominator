@@ -2,3 +2,4 @@ discord
 datetime
 pynacl
 requests
+pytube

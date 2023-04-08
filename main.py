@@ -5,6 +5,7 @@ import os
 import json
 import random
 import math
+import pytube
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -18,7 +19,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.9.3"
+Version = "2.9.4"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -293,6 +294,23 @@ async def songs_upload_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
 
+@bot.command()
+async def download(ctx, url: str, name: str):
+    try:
+        video = pytube.YouTube(url)
+        stream = video.streams.filter(only_audio=True).first()
+        await ctx.send('Загрузка...')
+        stream.download(output_path='./media', filename=name)
+        file = f'./media/{name}'
+        mp3_file = f'./media/{name}.mp3'
+        if os.path.isfile(file):
+            os.rename(file, mp3_file)
+            await ctx.send(f'Файл {name} был загружен на сервер.')
+        else:
+            await ctx.send(f'Error: File {file} not found')
+    except Exception as e:
+        print(f'Error: {e}')
+
 # PLAYLISTS MODULE:
 
 def load_playlists(playlist_name=None):
@@ -460,6 +478,7 @@ async def help(ctx):
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
     embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
     embed.add_field(name='$songs_upload "song title without extension"', value='Позволяет загрузить MP3 файл в папку с музыкой.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: К сообщению нужно прикрепить файл**)',inline=False)
+    embed.add_field(name='$download "YOUTUBE URL" "song title"', value="Позволяет загрузить песню с Youtube.",inline=False)
     embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
     embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: НАЗВАНИЕ ПЛЕЙЛИСТА ДОЛЖНО СОСТОЯТЬ ИЗ 1 слова.**)", inline=False)
     embed.add_field(name="$play_playlist [playlist title] [НЕОБЯЗАТЕЛЬНО: True (тогда плейлист будет играть снова)]", value="Воспроизводит плейлист.",inline=False)
