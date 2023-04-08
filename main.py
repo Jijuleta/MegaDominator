@@ -305,11 +305,13 @@ async def download(ctx, url: str, name: str):
         mp3_file = f'./media/{name}.mp3'
         if os.path.isfile(file):
             os.rename(file, mp3_file)
+            song_dict[name] = mp3_file  
             await ctx.send(f'Файл {name} был загружен на сервер.')
         else:
-            await ctx.send(f'Error: File {file} not found')
+            await ctx.send(f'Ошибка: файл {file} не был найден.')
     except Exception as e:
         print(f'Error: {e}')
+
 
 # PLAYLISTS MODULE:
 
