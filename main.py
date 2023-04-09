@@ -494,7 +494,7 @@ async def help(ctx):
     embed.add_field(name="$shuffle_playlist [playlist title] [НЕОБЯЗАТЕЛЬНО: True (тогда плейлист будет играть снова)]", value="Воспроизводит перемешанный плейлист.",inline=False)
     embed.add_field(name="$songs_playlist [playlist title]", value="Выводит список песен в плейлисте.", inline=False)
     embed.add_field(name='$songs_delete "playlist title" "song" "song2"', value="Удаляет определенную песню из плейлиста. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
-    embed.add_field(name='$songs_add "playlist title" "song" "song2"', value="Добавляет определенную песню из плейлиста. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
+    embed.add_field(name='$songs_add "playlist title" "song" "song2"', value="Добавляет определенную песню в плейлист. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
