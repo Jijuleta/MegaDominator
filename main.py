@@ -19,7 +19,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.9.4"
+Version = "2.9.5"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -299,6 +299,9 @@ async def songs_upload_error(ctx, error):
 async def download(ctx, url: str, name: str):
     try:
         video = pytube.YouTube(url)
+        if video.length > 600:
+            await ctx.send('Ошибка: видео слишком длинное.')
+            return
         stream = video.streams.filter(only_audio=True).first()
         await ctx.send('Загрузка...')
         stream.download(output_path='./media', filename=name)
@@ -311,7 +314,7 @@ async def download(ctx, url: str, name: str):
         else:
             await ctx.send(f'Ошибка: файл {file} не был найден.')
     except Exception as e:
-        print(f'Error: {e}')
+        print(f'Error: {e}')    
 
 """@download.error
 async def download_error(ctx, error):
