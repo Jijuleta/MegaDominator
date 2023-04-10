@@ -13,13 +13,11 @@ from config import API_TOKEN
 from typing import Union
 from collections import deque
 
-# u have to create config.py and create API_TOKEN variable.
-
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.9.5"
+Version = "2.9.6"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -140,6 +138,9 @@ async def id(ctx, user: Union[discord.Member, int]):
 
 # MUSIC FEATURES
 
+if not os.path.exists("./media"):
+        os.mkdir("./media")
+
 MUSIC_LIBRARY_PATH = './media/'
 audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3'))]
 
@@ -229,7 +230,7 @@ async def play(ctx, *, song_title: str):
         await ctx.send(f"Проигрывается песня: {song_title}")
         audio_source = discord.FFmpegPCMAudio(song_path)
         voice_client.play(audio_source)
-        await change_rpc(f'{song_title}')
+        await change_rpc(song_title)
         while voice_client.is_playing():
             await asyncio.sleep(1)
 
@@ -237,7 +238,7 @@ async def play(ctx, *, song_title: str):
             next_song_path = song_queue.popleft()
             next_song_title = os.path.splitext(os.path.basename(next_song_path))[0]
             voice_client.play(discord.FFmpegPCMAudio(next_song_path), after=lambda e: asyncio.run_coroutine_threadsafe(play(ctx, next_song_title), bot.loop))
-            await change_rpc(f'{next_song_title}')
+            await change_rpc(next_song_title)
         else:
             await change_rpc(f'Version {Version}')
             await voice_client.disconnect()
@@ -386,7 +387,7 @@ async def play_playlist(ctx, name, loop=False):
             for song in cur_playlist:
                 source = FFmpegPCMAudio(f"./media/{song}.mp3")
                 voice_client.play(source)
-                await change_rpc(f'{song}')
+                await change_rpc(song)
                 while voice_client.is_playing():
                     await asyncio.sleep(1)
             if not loop:
@@ -418,7 +419,7 @@ async def shuffle_playlist(ctx, name, loop=False):
             for song in cur_playlist:
                 source = FFmpegPCMAudio(f"./media/{song}.mp3")
                 voice_client.play(source)
-                await change_rpc(f'{song}')
+                await change_rpc(song)
                 while voice_client.is_playing():
                     await asyncio.sleep(1)
             if not loop:
