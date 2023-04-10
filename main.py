@@ -17,7 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.9.6"
+Version = "2.9.7"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -31,7 +31,7 @@ async def on_ready():
 #@commands.has_permissions(administrator=True)
 async def dmbomb(ctx, times: int, user_id: int, *, message: str):
     if times > 100:
-        await ctx.send("Максимальное количество перемещений - 100.")
+        await ctx.send("Максимальное количество сообщений - 100.")
         return
     user = bot.get_user(user_id)
     if user is None:
@@ -57,7 +57,7 @@ async def dmbomb_error(ctx, error):
 #@commands.has_permissions(administrator=True)
 async def chbomb(ctx, times: int, user_id: int):
     if times > 100:
-        await ctx.send("Максимальное количество перемещений - 100.")
+        await ctx.send("Максимальное количество сообщений - 100.")
         return
     user = bot.get_user(user_id)
     if user is None:
@@ -149,9 +149,9 @@ async def change_rpc(s: str):
     await bot.change_presence(activity=act)
 
 song_dict = {}
-for file_name in audio_files:
-    title = os.path.splitext(file_name)[0]
-    song_dict[title] = os.path.join(MUSIC_LIBRARY_PATH, file_name)
+for song_title in audio_files:
+    title = os.path.splitext(song_title)[0]
+    song_dict[title] = os.path.join(MUSIC_LIBRARY_PATH, song_title)
 
 song_queue = deque()
 SONGS_PER_PAGE = 10
@@ -209,39 +209,44 @@ async def list(ctx, page: int = 1):
     else:
         await show_list(ctx, page, audio_files, 'Доступные песни:')
 
-
-@bot.command()
-async def play(ctx, *, song_title: str):
-    voice_client = ctx.voice_client
-
-    if not voice_client:
-        voice_channel = ctx.author.voice.channel
-        voice_client = await voice_channel.connect()
-
-    song_path = song_dict.get(song_title)
-    if not song_path:
-        await ctx.send(f"Я не смог найти песню с таким названием: {song_title}.")
-        return
-
-    if voice_client.is_playing():
-        song_queue.append(song_path)
-        await ctx.send(f'{song_title} добавлена в очередь.')
-    else:
-        await ctx.send(f"Проигрывается песня: {song_title}")
+async def songs_play(ctx, voice_client):
+    while len(song_queue) > 0:
+        song_title = song_queue.popleft()
+        song_path = song_dict.get(song_title)
         audio_source = discord.FFmpegPCMAudio(song_path)
         voice_client.play(audio_source)
         await change_rpc(song_title)
         while voice_client.is_playing():
             await asyncio.sleep(1)
+    await change_rpc(f'Version {Version}')
+    await voice_client.disconnect()
 
-        if len(song_queue) > 0:
-            next_song_path = song_queue.popleft()
-            next_song_title = os.path.splitext(os.path.basename(next_song_path))[0]
-            voice_client.play(discord.FFmpegPCMAudio(next_song_path), after=lambda e: asyncio.run_coroutine_threadsafe(play(ctx, next_song_title), bot.loop))
-            await change_rpc(next_song_title)
+@bot.command()
+async def play(ctx, *, song_title: str):
+    voice_client = ctx.voice_client
+    if not voice_client:
+        voice_channel = ctx.author.voice.channel
+        voice_client = await voice_channel.connect()
+        
+    song_path = song_dict.get(song_title)
+    if song_path:
+        song_queue.append(song_title)
+        if not voice_client.is_playing():
+            await ctx.send(f'Проигрывается песня: {song_title}')
+            await songs_play(ctx, voice_client)
         else:
-            await change_rpc(f'Version {Version}')
-            await voice_client.disconnect()
+            await ctx.send(f'Песня {song_title} добавлена в очередь.')
+    else:
+        await ctx.send(f'Не удалось найти песню: {song_title}')
+        
+@bot.command()
+async def skip(ctx):
+    voice_client = ctx.voice_client
+    if voice_client.is_playing():
+        voice_client.stop()
+        await ctx.send(f'Песня пропущена.')
+    else:
+        await ctx.send('Ничего не проигрывается.')
 
 @bot.command()
 async def queue(ctx):
@@ -484,6 +489,7 @@ async def help(ctx):
     embed.add_field(name="ДЛЯ РАБОТЫ МУЗЫКИ НУЖНО УСТАНОВИТЬ FFmpeg.", value="", inline=False)
     embed.add_field(name="$list", value="Выводит список доступных песен.", inline=False)
     embed.add_field(name="$play [song title]", value="Воспроизводит выбранную песню.", inline=False)
+    embed.add_field(name="$skip", value="Пропускает текущую песню.", inline=False)
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
     embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
     embed.add_field(name='$songs_upload "song title without extension"', value='Позволяет загрузить MP3 файл в папку с музыкой.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: К сообщению нужно прикрепить файл**)',inline=False)
