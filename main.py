@@ -156,13 +156,13 @@ for song_title in audio_files:
 song_queue = deque()
 SONGS_PER_PAGE = 10
 
-async def show_list(ctx, page: int, list: list, header: str):
-    num_pages = math.ceil(len(list) / SONGS_PER_PAGE)
+async def show_list(ctx, page: int, s_list, header: str):
+    num_pages = math.ceil(len(s_list) / SONGS_PER_PAGE)
     start_index = (page - 1) * SONGS_PER_PAGE
     end_index = start_index + SONGS_PER_PAGE
 
     embed = discord.Embed(title=header, color=0x00ff00)
-    for i, song in enumerate(list[start_index:end_index], start=start_index):
+    for i, song in enumerate(s_list[start_index:end_index], start=start_index):
         embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
 
     embed.set_footer(text=f'Страница {page}/{num_pages}. Для перехода на другую страницу используйте реакции ⬅️ и ➡️.')
@@ -196,7 +196,7 @@ async def show_list(ctx, page: int, list: list, header: str):
                     end_index = start_index + SONGS_PER_PAGE
 
                     embed.clear_fields()
-                    for i, song in enumerate(list[start_index:end_index], start=start_index):
+                    for i, song in enumerate(s_list[start_index:end_index], start=start_index):
                         embed.add_field(name=f'{i+1}. {os.path.splitext(song)[0]}', value='\u200b', inline=False)
 
                     embed.set_footer(text=f'Страница {page}/{num_pages}. Для перехода на другую страницу используйте реакции ⬅️ и ➡️.')
@@ -249,12 +249,12 @@ async def skip(ctx):
         await ctx.send('Ничего не проигрывается.')
 
 @bot.command()
-async def queue(ctx):
+async def queue(ctx, page: int = 1):
     if len(song_queue) == 0:
         await ctx.send('Очередь пуста.')
     else:
-        queue_list = '\n'.join([f'{i}. {os.path.splitext(os.path.basename(song))[0]}' for i, song in enumerate(song_queue, start=1)])
-        await ctx.send(f'Очередь:\n{queue_list}')
+        queue = [*song_queue]
+        await show_list(ctx, page, queue, 'Текущая очередь:')
 
 @bot.command()
 async def stop(ctx):
