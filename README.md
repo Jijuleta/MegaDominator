@@ -2,6 +2,10 @@
 
 Это самый добрый бот для Discord, который ТОЧНО не создан для буллинга людей.
 
+# ПЕРВОЕ ВКЛЮЧЕНИЕ:
+- Для того, чтобы бот запускался, нужно создать файл с названием config.py, в котором будет содержаться переменная API_TOKEN.
+**(ПРИМЕР:  API_TOKEN = "ТОКЕН БОТА")**
+
 # ИСПОЛЬЗОВАНИЕ БОТА:
 - Для вывода списка команд используйте - $help
 - Для корректной работы бота, нужно включить PRESENCE INTENT, SERVER MEMBERS INTENT, MESSAGE CONTENT INTENT в настройках Bot(https://discord.com/developers/applications).
@@ -19,6 +23,6 @@
 Для Docker используйте:
 - RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg
 
-# ЛЮТАЯ МУЗЫКАЛЬНАЯ БИБЛИОТЕКА:
-Папку скидывать в корень программы.
-- https://drive.google.com/drive/folders/11oTtbKapsU6ZvEkZgFz-frncZ5zedPxK?usp=sharing
+**Бот воспринимает только MP3 файлы.**
+
+
