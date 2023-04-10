@@ -19,6 +19,6 @@
 Для Docker используйте:
 - RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg
 
-Бот воспринимает только MP3 файлы.
+**Бот воспринимает только MP3 файлы.**
 
 
