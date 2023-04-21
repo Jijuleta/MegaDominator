@@ -17,7 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.9.7"
+Version = "2.9.9"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -154,7 +154,7 @@ for song_title in audio_files:
     song_dict[title] = os.path.join(MUSIC_LIBRARY_PATH, song_title)
 
 song_queue = deque()
-SONGS_PER_PAGE = 10
+SONGS_PER_PAGE = 15
 
 async def show_list(ctx, page: int, s_list, header: str):
     num_pages = math.ceil(len(s_list) / SONGS_PER_PAGE)
@@ -203,7 +203,7 @@ async def show_list(ctx, page: int, s_list, header: str):
                     await message.edit(embed=embed)
 
 @bot.command()
-async def list(ctx, page: int = 1):
+async def songs(ctx, page: int = 1):
     if not audio_files:
         await ctx.send("Нет доступных песен")
     else:
@@ -274,6 +274,10 @@ async def stop(ctx):
 async def songs_upload(ctx, *, file_name: str):
     artist_title = file_name.strip('"')
 
+    if len(file_name) > 100:
+        await ctx.send('Ошибка: название файла слишком длинное.')
+        return
+
     if not ctx.message.attachments:
         await ctx.send("Пожалуйста, прикрепите файл MP3 к вашему сообщению.")
         return
@@ -305,8 +309,11 @@ async def songs_upload_error(ctx, error):
 async def download(ctx, url: str, name: str):
     try:
         video = pytube.YouTube(url)
-        if video.length > 600:
+        if video.length is not None and video.length > 600:
             await ctx.send('Ошибка: видео слишком длинное.')
+            return
+        if len(name) > 100:
+            await ctx.send('Ошибка: название файла слишком длинное.')
             return
         stream = video.streams.filter(only_audio=True).first()
         await ctx.send('Загрузка...')
@@ -487,13 +494,13 @@ async def help(ctx):
     embed.add_field(name="$id [@user] or [user id]", value="При умоминании пользователя выводит его ID, если отправить ID пользователя, то бот отправит владельца ID.")
     embed.add_field(name=" ",value=" ", inline=False)
     embed.add_field(name="ДЛЯ РАБОТЫ МУЗЫКИ НУЖНО УСТАНОВИТЬ FFmpeg.", value="", inline=False)
-    embed.add_field(name="$list", value="Выводит список доступных песен.", inline=False)
+    embed.add_field(name="$songs", value="Выводит список доступных песен.", inline=False)
     embed.add_field(name="$play [song title]", value="Воспроизводит выбранную песню.", inline=False)
     embed.add_field(name="$skip", value="Пропускает текущую песню.", inline=False)
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
     embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
     embed.add_field(name='$songs_upload "song title without extension"', value='Позволяет загрузить MP3 файл в папку с музыкой.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: К сообщению нужно прикрепить файл**)',inline=False)
-    embed.add_field(name='$download "YOUTUBE URL" "song title"', value="Позволяет загрузить песню с Youtube.",inline=False)
+    embed.add_field(name='$download "YOUTUBE URL" "song title"', value="Позволяет загрузить песню с Youtube. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)",inline=False)
     embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
     embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: НАЗВАНИЕ ПЛЕЙЛИСТА ДОЛЖНО СОСТОЯТЬ ИЗ 1 слова.**)", inline=False)
     embed.add_field(name="$play_playlist [playlist title] [НЕОБЯЗАТЕЛЬНО: True (тогда плейлист будет играть снова)]", value="Воспроизводит плейлист.",inline=False)
@@ -503,9 +510,7 @@ async def help(ctx):
     embed.add_field(name='$songs_delete "playlist title" "song" "song2"', value="Удаляет определенную песню из плейлиста. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
     embed.add_field(name='$songs_add "playlist title" "song" "song2"', value="Добавляет определенную песню в плейлист. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)", inline=False)
     embed.add_field(name=" ", value= " ", inline=False)
-    embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
-    embed.add_field(name="Соавтор:", value="**ABrusil**",inline=False)
     embed.add_field(name="VERSION:", value= f'{Version}', inline=False)
     await ctx.send(embed=embed)
 
