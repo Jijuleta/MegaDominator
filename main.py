@@ -17,7 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.9.8"
+Version = "2.9.7"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -154,7 +154,7 @@ for song_title in audio_files:
     song_dict[title] = os.path.join(MUSIC_LIBRARY_PATH, song_title)
 
 song_queue = deque()
-SONGS_PER_PAGE = 15
+SONGS_PER_PAGE = 10
 
 async def show_list(ctx, page: int, s_list, header: str):
     num_pages = math.ceil(len(s_list) / SONGS_PER_PAGE)
@@ -203,7 +203,7 @@ async def show_list(ctx, page: int, s_list, header: str):
                     await message.edit(embed=embed)
 
 @bot.command()
-async def songs(ctx, page: int = 1):
+async def list(ctx, page: int = 1):
     if not audio_files:
         await ctx.send("Нет доступных песен")
     else:
@@ -274,10 +274,6 @@ async def stop(ctx):
 async def songs_upload(ctx, *, file_name: str):
     artist_title = file_name.strip('"')
 
-    if len(file_name) > 100:
-        await ctx.send('Ошибка: название файла слишком длинное.')
-        return
-
     if not ctx.message.attachments:
         await ctx.send("Пожалуйста, прикрепите файл MP3 к вашему сообщению.")
         return
@@ -311,9 +307,6 @@ async def download(ctx, url: str, name: str):
         video = pytube.YouTube(url)
         if video.length > 600:
             await ctx.send('Ошибка: видео слишком длинное.')
-            return
-        if len(name) > 100:
-            await ctx.send('Ошибка: название файла слишком длинное.')
             return
         stream = video.streams.filter(only_audio=True).first()
         await ctx.send('Загрузка...')
@@ -494,7 +487,7 @@ async def help(ctx):
     embed.add_field(name="$id [@user] or [user id]", value="При умоминании пользователя выводит его ID, если отправить ID пользователя, то бот отправит владельца ID.")
     embed.add_field(name=" ",value=" ", inline=False)
     embed.add_field(name="ДЛЯ РАБОТЫ МУЗЫКИ НУЖНО УСТАНОВИТЬ FFmpeg.", value="", inline=False)
-    embed.add_field(name="$songs", value="Выводит список доступных песен.", inline=False)
+    embed.add_field(name="$list", value="Выводит список доступных песен.", inline=False)
     embed.add_field(name="$play [song title]", value="Воспроизводит выбранную песню.", inline=False)
     embed.add_field(name="$skip", value="Пропускает текущую песню.", inline=False)
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
