@@ -6,7 +6,6 @@ import json
 import random
 import math
 import pytube
-import time
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -18,7 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "2.9.9-R2"
+Version = "2.9.9"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -310,40 +309,25 @@ async def songs_upload_error(ctx, error):
 async def download(ctx, url: str, name: str):
     try:
         video = pytube.YouTube(url)
+        if video.length is not None and video.length > 600:
+            await ctx.send('Ошибка: видео слишком длинное.')
+            return
         if len(name) > 100:
             await ctx.send('Ошибка: название файла слишком длинное.')
             return
-        file = f'./media/{name}.mp3'
-        if os.path.isfile(file):
-            await ctx.send(f'Ошибка: файл {name} уже существует на сервере.')
-            return
-        if video.length > 600:
-            await ctx.send(f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60} мин.')
-            return
         stream = video.streams.filter(only_audio=True).first()
         await ctx.send('Загрузка...')
-        
-        max_retries = 5
-        retries = 0
-        while retries < max_retries:
-            stream.download(output_path='./media', filename=name)
-            file = f'./media/{name}'
-            if os.path.isfile(file):
-                mp3_file = f'./media/{name}.mp3'
-                os.rename(file, mp3_file)
-                song_dict[name] = mp3_file  
-                await ctx.send(f'Файл {name} был загружен на сервер.')
-                return
-            else:
-                retries += 1
-                time.sleep(1)
-        
-        await ctx.send(f'Ошибка: файл {file} не был найден после {max_retries} попыток.')
-        
+        stream.download(output_path='./media', filename=name)
+        file = f'./media/{name}'
+        mp3_file = f'./media/{name}.mp3'
+        if os.path.isfile(file):
+            os.rename(file, mp3_file)
+            song_dict[name] = mp3_file  
+            await ctx.send(f'Файл {name} был загружен на сервер.')
+        else:
+            await ctx.send(f'Ошибка: файл {file} не был найден.')
     except Exception as e:
-        print(f'Error: {e}')
-
-    
+        print(f'Error: {e}')    
 
 """@download.error
 async def download_error(ctx, error):
