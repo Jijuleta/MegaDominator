@@ -17,6 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
+
 Version = "2.9.9-R3"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
