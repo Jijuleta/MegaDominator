@@ -319,6 +319,8 @@ async def download(ctx, url: str):
             base, ext = os.path.splitext(out_file)
             new_file = base + '.mp3'
             os.rename(out_file, new_file)
+            file_path = f'./media/{new_file}'
+            song_dict[video.title] = file_path
             await ctx.send(f'Файл {video.title} был загружен на сервер.')
         else:
             await ctx.send(f'Ошибка: файл не был найден.')
