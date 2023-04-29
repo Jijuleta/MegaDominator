@@ -5,8 +5,7 @@ import os
 import json
 import random
 import math
-import pytube
-import time
+from pytube import YouTube as YT
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
@@ -307,43 +306,24 @@ async def songs_upload_error(ctx, error):
 
 @bot.command()
 #@commands.has_permissions(administrator=True)
-async def download(ctx, url: str, name: str):
+async def download(ctx, url: str):
     try:
-        video = pytube.YouTube(url)
-        if len(name) > 100:
-            await ctx.send('Ошибка: название файла слишком длинное.')
-            return
-        file = f'./media/{name}.mp3'
-        if os.path.isfile(file):
-            await ctx.send(f'Ошибка: файл {name} уже существует на сервере.')
-            return
+        video=YT(url, use_oauth=True, allow_oauth_cache=True)
+        filtered=video.streams.filter(only_audio=True)
         if video.length > 600:
-            await ctx.send(f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60} мин.')
+            await ctx.send('Ошибка: видео слишком длинное.')
             return
-        stream = video.streams.filter(only_audio=True).first()
         await ctx.send('Загрузка...')
-        
-        max_retries = 5
-        retries = 0
-        while retries < max_retries:
-            stream.download(output_path='./media', filename=name)
-            file = f'./media/{name}'
-            if os.path.isfile(file):
-                mp3_file = f'./media/{name}.mp3'
-                os.rename(file, mp3_file)
-                song_dict[name] = mp3_file  
-                await ctx.send(f'Файл {name} был загружен на сервер.')
-                return
-            else:
-                retries += 1
-                time.sleep(1)
-        
-        await ctx.send(f'Ошибка: файл {file} не был найден после {max_retries} попыток.')
-        
+        out_file = filtered[0].download('./media/')
+        if os.path.isfile(out_file):
+            base, ext = os.path.splitext(out_file)
+            new_file = base + '.mp3'
+            os.rename(out_file, new_file)
+            await ctx.send(f'Файл {video.title} был загружен на сервер.')
+        else:
+            await ctx.send(f'Ошибка: файл не был найден.')
     except Exception as e:
-        print(f'Error: {e}')
-
-    
+        print(f"Error: {e}")
 
 """@download.error
 async def download_error(ctx, error):
@@ -516,7 +496,7 @@ async def help(ctx):
     embed.add_field(name="$queue", value="Показывает очередь песен.", inline=False)
     embed.add_field(name="$stop", value="Останавливает музыку.", inline=False)
     embed.add_field(name='$songs_upload "song title without extension"', value='Позволяет загрузить MP3 файл в папку с музыкой.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: К сообщению нужно прикрепить файл**)',inline=False)
-    embed.add_field(name='$download "YOUTUBE URL" "song title"', value="Позволяет загрузить песню с Youtube. (**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**)",inline=False)
+    embed.add_field(name='$download YOUTUBE URL', value="Позволяет загрузить песню с Youtube.",inline=False)
     embed.add_field(name="$playlists", value="Показывает доступные плейлисты", inline=False)
     embed.add_field(name='$create_playlist "playlist title" "full song title 1" "full song title 2"...', value="Создает новый плейлист.(**NOTE: ОБЯЗАТЕЛЬНО ИСПОЛЬЗУЙТЕ КАВЫЧКИ, КАК В ПРИМЕРЕ**) (**NOTE 2: НАЗВАНИЕ ПЛЕЙЛИСТА ДОЛЖНО СОСТОЯТЬ ИЗ 1 слова.**)", inline=False)
     embed.add_field(name="$play_playlist [playlist title] [НЕОБЯЗАТЕЛЬНО: True (тогда плейлист будет играть снова)]", value="Воспроизводит плейлист.",inline=False)
