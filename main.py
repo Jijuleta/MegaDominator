@@ -308,6 +308,7 @@ async def songs_upload_error(ctx, error):
 @bot.command()
 #@commands.has_permissions(administrator=True)
 async def download(ctx, url: str):
+    global song_dict
     try:
         video=YT(url, use_oauth=True, allow_oauth_cache=True)
         filtered=video.streams.filter(only_audio=True)
@@ -320,8 +321,7 @@ async def download(ctx, url: str):
             base, ext = os.path.splitext(out_file)
             new_file = base + '.mp3'
             os.rename(out_file, new_file)
-            file_path = f'./media/{new_file}'
-            song_dict[video.title] = file_path
+            song_dict[video.title] = new_file
             await ctx.send(f'Файл {video.title} был загружен на сервер.')
         else:
             await ctx.send(f'Ошибка: файл не был найден.')
