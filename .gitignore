@@ -2,3 +2,4 @@ config.py
 __pycache__/
 media/
 playlists.json
+commands.json

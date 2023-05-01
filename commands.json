@@ -1,0 +1,22 @@
+{
+    "dmbomb": true,
+    "chbomb": true,
+    "spmove": true,
+    "purge": true,
+    "id": false,
+    "songs": false,
+    "play": false,
+    "skip": true,
+    "queue": false,
+    "stop": true,
+    "songs_upload": true,
+    "download": true,
+    "playlists": false,
+    "create_playlist": true,
+    "play_playlist": false,
+    "delete_playlist": true,
+    "shuffle_playlist": false,
+    "songs_playlist": false,
+    "songs_delete": true,
+    "songs_add": true
+}
