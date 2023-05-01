@@ -39,7 +39,7 @@ async def settings(ctx):
     reactions = []
 
     for i, (command, admin_only) in enumerate(commands.items(), start=1):
-        output_message += f"{emojis[i-1]} {command} - {'доступна для всех пользователей' if not admin_only else 'доступна только для администраторов'}\n"
+        output_message += f"{emojis[i-1]} {command} - {'доступна только для администраторов' if not admin_only else 'доступна для всех пользователей'}\n"
     output_message += "\nНажмите реакцию с буквой команды, чтобы переключить ее доступность."
     message = await ctx.send(output_message)
 
