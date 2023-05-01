@@ -18,7 +18,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "2.9.9-R4"
+Version = "3.0.0-R1"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -29,8 +29,58 @@ async def on_ready():
     await bot.change_presence(activity=activity)
 
 @bot.command()
-#@commands.has_permissions(administrator=True)
+@commands.has_permissions(administrator=True)
+async def settings(ctx):
+    with open("commands.json", "r") as f:
+        commands = json.load(f)
+
+    output_message = "Доступные команды:\n"
+    emojis = ["🇦","🇧","🇨","🇩","🇪","🇫","🇬","🇭","🇮","🇯","🇰","🇱","🇲","🇳","🇴","🇵","🇶","🇷","🇸","🇹"]
+    reactions = []
+
+    for i, (command, admin_only) in enumerate(commands.items(), start=1):
+        output_message += f"{emojis[i-1]} {command} - {'доступна для всех пользователей' if not admin_only else 'доступна только для администраторов'}\n"
+    output_message += "\nНажмите реакцию с буквой команды, чтобы переключить ее доступность."
+    message = await ctx.send(output_message)
+
+    for i in range(len(commands)):
+        reaction = emojis[i]
+        await message.add_reaction(reaction)
+        reactions.append(reaction)
+
+    def check(reaction, user):
+        return (
+            user.guild_permissions.administrator
+            and reaction.message == message
+            and str(reaction.emoji) in emojis
+        )
+
+    try:
+        reaction, user = await bot.wait_for("reaction_add", check=check, timeout=30)
+        command_index = emojis.index(str(reaction.emoji))
+        command_name = list(commands.keys())[command_index]
+        commands[command_name] = not commands[command_name]
+
+        with open("commands.json", "w") as f:
+            json.dump(commands, f, indent=4)
+
+        await message.edit(content="Доступность команды обновлена.")
+    except asyncio.TimeoutError:
+        for reaction in reactions:
+            await message.clear_reaction(reaction)      
+
+@settings.error
+async def settings_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
+
+@bot.command()
 async def dmbomb(ctx, times: int, user_id: int, *, message: str):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["dmbomb"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     if times > 100:
         await ctx.send("Максимальное количество сообщений - 100.")
         return
@@ -48,15 +98,13 @@ async def dmbomb(ctx, times: int, user_id: int, *, message: str):
     
     await ctx.send(f'{user} был уничтожен в личных сообщениях {times} раз.')
 
-
-"""@dmbomb.error
-async def dmbomb_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
-
 @bot.command()
-#@commands.has_permissions(administrator=True)
 async def chbomb(ctx, times: int, user_id: int):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["chbomb"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     if times > 100:
         await ctx.send("Максимальное количество сообщений - 100.")
         return
@@ -76,15 +124,13 @@ async def chbomb(ctx, times: int, user_id: int):
     await channel.delete()
 
 
-"""@chbomb.error
-async def chbomb_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
-
-
-
 @bot.command()
 async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChannel):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["spmove"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     if num_moves > 100:
         await ctx.send("Максимальное количество перемещений - 100.")
         return
@@ -102,29 +148,26 @@ async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChanne
     await ctx.send(f"Пользователь {user.name} был перемещен между {channel.name} и {original_channel.name} {num_moves} раз.")
 
 
-'''@bot.command()
-async def chngrpc(ctx, *, rpc_name: str):
-    activity = discord.Activity(name=rpc_name, type=discord.ActivityType.watching, details="Watching", state="Discord")
-    await bot.change_presence(activity=activity)
-    print(f"Changed Rich Presence to: {rpc_name}")
-    await ctx.send(f"Rich Presence был изменен на: {rpc_name}")'''
-
 @bot.command()
-@commands.has_permissions(administrator=True)
 async def purge(ctx, limit: int):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["purge"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     if limit > 100:
         await ctx.send("Максимальное количество перемещений - 100.")
         return
     deleted = await ctx.channel.purge(limit=limit+1)
     await ctx.send(f"{len(deleted) - 1} сообщений было успешно удалено!")
-    
-@purge.error
-async def purge_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
 
 @bot.command()
 async def id(ctx, user: Union[discord.Member, int]):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["id"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("This command is not available for all users.")
+        return
     if isinstance(user, int):
         try:
             user = await bot.fetch_user(user)
@@ -205,6 +248,11 @@ async def show_list(ctx, page: int, s_list, header: str):
 
 @bot.command()
 async def songs(ctx, page: int = 1):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["songs"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     if not audio_files:
         await ctx.send("Нет доступных песен")
     else:
@@ -224,6 +272,11 @@ async def songs_play(ctx, voice_client):
 
 @bot.command()
 async def play(ctx, *, song_title: str):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["play"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     voice_client = ctx.voice_client
     if not voice_client:
         voice_channel = ctx.author.voice.channel
@@ -242,6 +295,11 @@ async def play(ctx, *, song_title: str):
         
 @bot.command()
 async def skip(ctx):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["skip"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     voice_client = ctx.voice_client
     if voice_client.is_playing():
         voice_client.stop()
@@ -251,6 +309,11 @@ async def skip(ctx):
 
 @bot.command()
 async def queue(ctx, page: int = 1):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["queue"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     if len(song_queue) == 0:
         await ctx.send('Очередь пуста.')
     else:
@@ -259,6 +322,11 @@ async def queue(ctx, page: int = 1):
 
 @bot.command()
 async def stop(ctx):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["stop"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     voice_client = ctx.voice_client
     if voice_client:
         if voice_client.is_playing():
@@ -271,8 +339,12 @@ async def stop(ctx):
         await ctx.send('Ничего не проигрывается.')
 
 @bot.command()
-#@commands.has_permissions(administrator=True)
 async def songs_upload(ctx, *, file_name: str):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["songs_upload"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     artist_title = file_name.strip('"')
 
     if len(file_name) > 100:
@@ -299,15 +371,13 @@ async def songs_upload(ctx, *, file_name: str):
     song_dict[artist_title] = file_path
     await ctx.send(f"Файл был успешно сохранен как '{artist_title}'.")
 
-
-"""@songs_upload.error
-async def songs_upload_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
-
 @bot.command()
-#@commands.has_permissions(administrator=True)
 async def download(ctx, url: str, title: str = ""):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["download"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     global song_dict
     try:
         video=YT(url, use_oauth=True, allow_oauth_cache=True)
@@ -329,11 +399,6 @@ async def download(ctx, url: str, title: str = ""):
             await ctx.send(f'Ошибка: файл не был найден.')
     except Exception as e:
         print(f"Error: {e}")
-
-"""@download.error
-async def download_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
 
 def load_playlists(playlist_name=None):
     if os.path.exists("playlists.json"):
@@ -369,6 +434,11 @@ def save_playlists(playlists):
 
 @bot.command()
 async def playlists(ctx, page: int = 1):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["playlists"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     playlists = load_playlists()
     if not playlists:
         await ctx.send("Нет доступных плейлистов.")
@@ -378,6 +448,11 @@ async def playlists(ctx, page: int = 1):
 
 @bot.command()
 async def create_playlist(ctx, name, *songs):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["create_playlist"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     playlists = load_playlists()
     if name in playlists:
         await ctx.send("Плейлист с этим именем уже существует.")
@@ -388,6 +463,11 @@ async def create_playlist(ctx, name, *songs):
 
 @bot.command()
 async def play_playlist(ctx, name, loop=False):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["play_playlist"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     playlists = load_playlists()
     if name not in playlists:
         await ctx.send("Плейлиста с таким именем не существует.")
@@ -410,6 +490,11 @@ async def play_playlist(ctx, name, loop=False):
         
 @bot.command()
 async def delete_playlist(ctx, name):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["delete_playlist"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     playlists = load_playlists()
     if name in playlists:
         del playlists[name]
@@ -420,6 +505,11 @@ async def delete_playlist(ctx, name):
         
 @bot.command()
 async def shuffle_playlist(ctx, name, loop=False):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["shuffle_playlist"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     playlists = load_playlists()
     if name in playlists:
         voice_channel = ctx.author.voice.channel
@@ -444,6 +534,11 @@ async def shuffle_playlist(ctx, name, loop=False):
 
 @bot.command()
 async def songs_playlist(ctx, name, page: int = 1):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["songs_playlist"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     playlists = load_playlists()
     if name in playlists:
         await show_list(ctx, page, playlists[name], f'Песни в плейлисте {name}:')
@@ -452,6 +547,11 @@ async def songs_playlist(ctx, name, page: int = 1):
 
 @bot.command()
 async def songs_delete(ctx, name, *args):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["songs_delete"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     playlists = load_playlists()
     if name in playlists:
         deleted_songs = []
@@ -470,6 +570,11 @@ async def songs_delete(ctx, name, *args):
 
 @bot.command()
 async def songs_add(ctx, name, *args):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands["songs_add"] and not ctx.author.guild_permissions.administrator:
+        await ctx.send("Эта команда недоступна для всех пользователей.")
+        return
     playlists = load_playlists()
     if name in playlists:
         added_songs = []
@@ -488,12 +593,12 @@ async def songs_add(ctx, name, *args):
 @bot.command()
 async def help(ctx):
     embed = discord.Embed(title="Команды бота", color=0x00ff00)
+    embed.add_field(name="$settings", value="Позволяет настроить бота.",inline=False)
     embed.add_field(name="$dmbomb [times] [user_id] [message]", value="Отправить сообщение в личку определенное количество раз.", inline=False)
     embed.add_field(name="$chbomb [times] [user_id]", value="Создать временный канал, где человек будет тегнут определенное количество раз.", inline=False)
     embed.add_field(name="$spmove [num_moves] [user_id] [channel]", value="Супер-перемещение между оригинальным и указанным каналом.", inline=False)
-    embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.(требуются админ права)", inline=False)
+    embed.add_field(name="$purge [limit]", value="Удалить определенное количество сообщений в канале.", inline=False)
     embed.add_field(name="$id [@user] or [user id]", value="При умоминании пользователя выводит его ID, если отправить ID пользователя, то бот отправит владельца ID.")
-    embed.add_field(name=" ",value=" ", inline=False)
     embed.add_field(name="ДЛЯ РАБОТЫ МУЗЫКИ НУЖНО УСТАНОВИТЬ FFmpeg.", value="", inline=False)
     embed.add_field(name="$songs", value="Выводит список доступных песен.", inline=False)
     embed.add_field(name="$play [song title]", value="Воспроизводит выбранную песню.", inline=False)
