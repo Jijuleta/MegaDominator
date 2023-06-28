@@ -11,6 +11,9 @@
 - Для корректной работы бота, нужно включить PRESENCE INTENT, SERVER MEMBERS INTENT, MESSAGE CONTENT INTENT в настройках Bot(https://discord.com/developers/applications).
 - Для использования команды $download в первый раз нужно будет залогиниться через google.com/device , код будет показан в консоле.
 
+# ВАЖНО:
+- Библиотека Pytube работает очень плохо в последнее время, поэтому нужно зайти в файл cipher.py , который можно найти используя команду: **python3 -c "import pytube as _; print(_.__path__)"**
+- В файле cipher.py нужно найти функцию get_throttling_function_name и в function_patterns прописать это: **https://pastebin.com/j3KHp6XC**
 # ИСПОЛЬЗОВАНИЕ МУЗЫКАЛЬНЫХ КОМАНД:
 Музыкальные команды работают ТОЛЬКО при установленном FFmpeg.
 Ссылки на скачивание: 
