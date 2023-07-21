@@ -1,0 +1,8 @@
+config.py
+__pycache__/
+media/
+playlists.json
+.dockerignore
+Dockerfile
+.vscode/
+cipher.py
