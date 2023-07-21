@@ -9,7 +9,6 @@
 # ИСПОЛЬЗОВАНИЕ БОТА:
 - Для вывода списка команд используйте - $help
 - Для корректной работы бота, нужно включить PRESENCE INTENT, SERVER MEMBERS INTENT, MESSAGE CONTENT INTENT в настройках Bot(https://discord.com/developers/applications).
-- Для использования команды $download в первый раз нужно будет залогиниться через google.com/device , код будет показан в консоле.
 
 # ВАЖНО:
 - Библиотека Pytube работает очень плохо в последнее время, поэтому нужно зайти в файл cipher.py , который можно найти используя команду: **python3 -c "import pytube as _; print(_.__path__)"**
@@ -28,5 +27,3 @@
 - RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg
 
 **Бот воспринимает только MP3 файлы.**
-
-
