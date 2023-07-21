@@ -11,15 +11,13 @@ def update():
         os.replace('new_main.py', 'main.py')
         print(f'Бот успешно обновлен.')
         
-        # download new requirements.txt
-        url_req = 'https://raw.githubusercontent.com/Theuridon/MegaDominator/master/requirements.txt'
+        url_req = 'https://raw.githubusercontent.com/Jijuleta/MegaDominator/master/requirements.txt'
         req = requests.get(url_req)
         if req.status_code == 200:
             with open('new_requirements.txt', 'wb') as f:
                 f.write(req.content)
                 f.close()
             os.replace('new_requirements.txt', 'requirements.txt')
-            # install new requirements
             os.system('pip install -r requirements.txt')
             print(f'Зависимости успешно обновлены.')
         else:
@@ -28,4 +26,3 @@ def update():
         print('Не удалось обновить бота.')
     
 update()
-
