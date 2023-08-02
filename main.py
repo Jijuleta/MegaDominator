@@ -26,7 +26,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "3.1.0"
+Version = "3.1.1"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -37,6 +37,13 @@ async def on_ready():
     print(f'Synced {len(sync)} command')
     activity = discord.Activity(name=f'Version {Version}', type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
+
+async def adminCheck(commandName: str, interaction: discord.Interaction):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands[commandName] and not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
+        return
 
 @bot.tree.command(name="showsettings", description="Показывает текущие настройки бота.")
 async def show_settings_func(interaction: discord.Interaction):
@@ -66,6 +73,25 @@ async def purge_func(interaction: discord.Interaction, messages: int, channel: d
 
 if not os.path.exists("./media"):
         os.mkdir("./media")
+
+if not os.path.exists("./temp"):
+        os.mkdir("./temp")
+
+def clean_temp_folder(folder_path):
+    try:
+        files = os.listdir(folder_path)
+
+        for file in files:
+            file_path = os.path.join(folder_path, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+        
+        print("Folder cleanup completed.")
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")
+
+clean_temp_folder("./temp")
 
 MUSIC_LIBRARY_PATH = './media/'
 audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3'))]
@@ -100,11 +126,7 @@ async def show_list(interaction: discord.Interaction, page: int, s_list, header:
 
 @bot.tree.command(name="songs", description="Выводит список доступных песен.")
 async def songs(interaction: discord.Interaction, page: int = 1):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["songs"] and not interaction.user.guild_permissions.administrator:
-        await interaction.send("Эта команда недоступна для всех пользователей.")
-        return
+    await adminCheck("songs", interaction)
     if not audio_files:
         await interaction.send("Нет доступных песен")
     else:
@@ -124,11 +146,7 @@ async def songs_play(voice_client):
 
 @bot.tree.command(name="play", description="Воспроизводит выбранную песню.")
 async def play(interaction: discord.Interaction, song_title: str):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["play"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("play", interaction)
     voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
     if not voice_client:
         voice_channel = interaction.user.voice.channel
@@ -147,11 +165,7 @@ async def play(interaction: discord.Interaction, song_title: str):
         
 @bot.tree.command(name="skip", description="Пропускает текущую песню.")
 async def skip(interaction: discord.Interaction):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["skip"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("skip", interaction)
     voice_channel = interaction.user.voice.channel
     voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
     if voice_client and voice_client.is_playing():
@@ -163,11 +177,7 @@ async def skip(interaction: discord.Interaction):
 
 @bot.tree.command(name="queue", description="Показывает очередь песен.")
 async def queue(interaction: discord.Interaction, page: int = 1):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["queue"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("queue", interaction)
     if len(song_queue) == 0:
         await interaction.response.send_message(content='Очередь пуста.',ephemeral=True)
     else:
@@ -176,11 +186,7 @@ async def queue(interaction: discord.Interaction, page: int = 1):
 
 @bot.tree.command(name="stop", description="Останавливает музыку.")
 async def stop(interaction: discord.Interaction):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["stop"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("stop", interaction)
     voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
     if voice_client:
         if voice_client.is_playing():
@@ -198,11 +204,7 @@ async def songsupload(interaction:discord.Interaction):
 
 @bot.command()
 async def songs_upload(ctx, *, file_name: str):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["songs_upload"] and not ctx.author.guild_permissions.administrator:
-        await ctx.send("Эта команда недоступна для всех пользователей.")
-        return
+    await adminCheck("songs_upload")
     artist_title = file_name.strip('"')
 
     if len(file_name) > 100:
@@ -237,11 +239,7 @@ async def songs_upload_error(ctx, error):
 
 @bot.tree.command(name="download", description="Позволяет загрузить песню с Youtube.")
 async def download(interaction: discord.Interaction, url: str, title: str = ""):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["download"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("download", interaction)
     global song_dict
     try:
         video=YT(url, use_oauth=False, allow_oauth_cache=False)
@@ -297,11 +295,7 @@ def save_playlists(playlists):
 
 @bot.tree.command(name="playlists", description="Показывает доступные плейлисты.")
 async def playlists(interaction: discord.Interaction, page: int = 1):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["playlists"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("playlists", interaction)
     playlists = load_playlists()
     if not playlists:
         await interaction.response.send_message(content="Нет доступных плейлистов.", ephemeral=True)
@@ -311,11 +305,7 @@ async def playlists(interaction: discord.Interaction, page: int = 1):
 
 @bot.tree.command(name="create_playlist", description="Создает новый плейлист.")
 async def create_playlist(interaction: discord.Interaction, name: str):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["create_playlist"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("create_playlist", interaction)
     playlists = load_playlists()
     if name in playlists:
         await interaction.response.send_message(content="Плейлист с этим именем уже существует.", ephemeral=True)
@@ -327,11 +317,7 @@ async def create_playlist(interaction: discord.Interaction, name: str):
 
 @bot.tree.command(name="play_playlist", description="Воспроизводит плейлист.")
 async def play_playlist(interaction: discord.Interaction, name: str, loop: bool = False):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["play_playlist"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("play_playlist", interaction)
     playlists = load_playlists()
     if name not in playlists:
         await interaction.response.send_message(content="Плейлиста с таким именем не существует.", ephemeral=True)
@@ -354,11 +340,7 @@ async def play_playlist(interaction: discord.Interaction, name: str, loop: bool 
 
 @bot.tree.command(name="delete_playlist", description="Удаляет плейлист.")
 async def delete_playlist(interaction: discord.Interaction, name: str):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["delete_playlist"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("delete_playlist", interaction)
     playlists = load_playlists()
     if name in playlists:
         del playlists[name]
@@ -369,11 +351,7 @@ async def delete_playlist(interaction: discord.Interaction, name: str):
        
 @bot.tree.command(name="shuffle_playlist", description="Воспроизводит перемешанный плейлист.")
 async def shuffle_playlist(interaction: discord.Interaction, name: str, loop: bool = False):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["shuffle_playlist"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("shuffle_playlist", interaction)
     playlists = load_playlists()
     if name in playlists:
         voice_channel = interaction.user.voice.channel
@@ -398,11 +376,7 @@ async def shuffle_playlist(interaction: discord.Interaction, name: str, loop: bo
 
 @bot.tree.command(name="songs_playlist", description="Выводит список песен в плейлисте.")
 async def songs_playlist(interaction: discord.Interaction, name: str, page: int = 1):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["songs_playlist"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("songs_playlist", interaction)
     playlists = load_playlists()
     if name in playlists:
         await show_list(interaction, page, playlists[name], f'Песни в плейлисте {name}:')
@@ -411,11 +385,7 @@ async def songs_playlist(interaction: discord.Interaction, name: str, page: int 
 
 @bot.tree.command(name="songs_delete", description="Удаляет определенную песню из плейлиста.")
 async def songs_delete(interaction: discord.Interaction, name: str, song: str):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["songs_delete"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("songs_delete", interaction)
     playlists = load_playlists()
     if name in playlists:
         if song in playlists[name]:
@@ -429,11 +399,7 @@ async def songs_delete(interaction: discord.Interaction, name: str, song: str):
 
 @bot.tree.command(name="songs_add", description="Добавляет определенную песню в плейлист.")
 async def songs_add(interaction: discord.Interaction, name: str, song: str):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["songs_add"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("songs_add", interaction)
     playlists = load_playlists()
     if name in playlists:
         if song not in playlists[name]:
@@ -444,5 +410,59 @@ async def songs_add(interaction: discord.Interaction, name: str, song: str):
             await interaction.response.send_message(content=f"Песня {song} уже существует в плейлисте {name}.", ephemeral=True)
     else:
         await interaction.response.send_message(content=f"Плейлист {name} не найден.", ephemeral=True)
+
+@bot.tree.command(name="stream", description="Временно скачивает и проигрывает песню с Youtube. (Поддеживает очередь)")
+async def stream(interaction: discord.Interaction, url: str):
+    await adminCheck("stream", interaction)
+    voice_channel = interaction.user.voice.channel
+    voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
+
+    if voice_client is None:
+        voice_client = await voice_channel.connect()
+
+    try:
+        video = YT(url, use_oauth=False, allow_oauth_cache=False)
+        filtered = video.streams.filter(only_audio=True)
+        if video.length > 600 or video.length < 1:
+            await interaction.response.send_message(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.', ephemeral=True)
+            return
+
+        await interaction.response.send_message(content='Проигрываю/Добавляю в очередь файл стрима.', ephemeral=True)
+
+        out_file = filtered[0].download('./temp/')
+
+        if os.path.isfile(out_file):
+            base, ext = os.path.splitext(out_file)
+            title = video.title
+
+            song_dict[title] = out_file
+
+            song_queue.append(title)
+            if not voice_client.is_playing():
+
+                audio_source = discord.FFmpegPCMAudio(out_file)
+                voice_client.play(audio_source)
+
+                while voice_client.is_playing():
+                    await asyncio.sleep(1)
+
+                os.remove(out_file)
+                del song_dict[title]
+
+                while len(song_queue) > 0:
+                    next_song = song_queue.popleft()
+                    next_file = song_dict.get(next_song)
+                    if next_file:
+                        audio_source = discord.FFmpegPCMAudio(next_file)
+                        voice_client.play(audio_source)
+                        while voice_client.is_playing():
+                            await asyncio.sleep(1)
+                        os.remove(next_file)
+                        del song_dict[next_song]
+
+                await voice_client.disconnect()
+                clean_temp_folder("./temp")
+    except Exception as e:
+        print(f"Error: {e}")
 
 bot.run(APIToken)

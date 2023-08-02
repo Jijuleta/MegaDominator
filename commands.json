@@ -18,6 +18,7 @@
     "songs_playlist": true,
     "songs_delete": true,
     "songs_add": true,
+    "stream": true,
     "show_settings": false,
     "change_settings": false
 }

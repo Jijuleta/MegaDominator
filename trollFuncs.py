@@ -3,12 +3,15 @@ import json
 import asyncio
 import datetime
 
-async def dmbomb(interaction: discord.Interaction, times: int, user: discord.User, message: str):
+async def adminCheck(commandName: str, interaction: discord.Interaction):
     with open("commands.json", "rb") as f:
         commands = json.load(f)
-    if not commands["dmbomb"] and not interaction.user.guild_permissions.administrator:
+    if not commands[commandName] and not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
         return
+
+async def dmbomb(interaction: discord.Interaction, times: int, user: discord.User, message: str):
+    await adminCheck("dmbomb", interaction)
     if times > 100:
         await interaction.response.send_message(content="Максимальное количество сообщений - 100.", ephemeral=True)
         return
@@ -18,18 +21,14 @@ async def dmbomb(interaction: discord.Interaction, times: int, user: discord.Use
     await interaction.response.send_message(content=f'Я уничтожаю {user} в личных сообщениях {times} раз.', ephemeral=True)
     for i in range(times):
         try:
-            print(f'Dmbombing {user} with "{message}" message')
+            print(f'Dmbombing {user} with "{message}" message {times} times')
             await user.send(message)
         except discord.Forbidden:
             print(f"User {user.name} has blocked the bot.")
             await interaction.guild.ban(user, reason="User has blocked the bot.")
 
 async def chbomb(interaction: discord.Interaction, times: int, user: discord.User):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["chbomb"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("chbomb", interaction)
     if times > 100:
         await interaction.response.send_message(content="Максимальное количество сообщений - 100.", ephemeral=True)
         return
@@ -48,11 +47,7 @@ async def chbomb(interaction: discord.Interaction, times: int, user: discord.Use
     await channel.delete()
 
 async def spmove(interaction: discord.Interaction, num_moves: int, user: discord.User, channel: discord.VoiceChannel):
-    with open("commands.json", "rb") as f:
-        commands = json.load(f)
-    if not commands["spmove"] and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
-        return
+    await adminCheck("spmove", interaction)
     if num_moves > 100:
         await interaction.response.send_message(content="Максимальное количество перемещений - 100.", ephemeral=True)
         return
@@ -70,3 +65,5 @@ async def spmove(interaction: discord.Interaction, num_moves: int, user: discord
         await discord.utils.sleep_until(datetime.datetime.now() + datetime.timedelta(seconds=1))
     
     print(f"Moved {user.name} back and forth between {channel.name} and {original_channel.name} {num_moves} times.")
+
+
