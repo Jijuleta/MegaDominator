@@ -1,7 +1,6 @@
 # python3 -c "import pytube as _; print(_.__path__)"
 # python3 -m pip install --force-reinstall https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
 import discord
-import datetime
 import asyncio
 import os
 import json
@@ -11,12 +10,9 @@ from discord import FFmpegPCMAudio
 from pytube import YouTube as YT
 from discord.ext import commands
 from discord.utils import get
-from config import APIToken
+from config import API_TOKEN
+from typing import Union
 from collections import deque
-from pytube import innertube
-
-from moderationFuncs import show_settings, change_settings, purge
-from trollFuncs import dmbomb, chbomb, spmove
 
 innertube._cache_dir = os.path.join(os.getcwd(), "cache")
 innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
@@ -25,8 +21,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-
-Version = "3.1.1"
+Version = "2.7.9"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -45,29 +40,77 @@ async def adminCheck(commandName: str, interaction: discord.Interaction):
         await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
         return
 
-@bot.tree.command(name="showsettings", description="Показывает текущие настройки бота.")
-async def show_settings_func(interaction: discord.Interaction):
-    await show_settings(interaction)
+    channel = await ctx.guild.create_text_channel(name=f"chbomb-{user_id}")
+    await channel.set_permissions(user, read_messages=True, send_messages=True)
 
-@bot.tree.command(name="changesettings", description="Позволяет изменить настройки бота.")
-async def change_settings_func(interaction: discord.Interaction, command_name: str, state: bool):
-    await change_settings(interaction, command_name, state)
+    for i in range(times):
+        print(f'Chbombing {user} {i+1}/{times} times')
+        await channel.send(f"Дурашка на {user.mention}, тебя чпокнули {i+1}/{times} раз")
+    await ctx.send(f"{user} был разбомблен в канале {times} раз.")
+    await asyncio.sleep(180)
+    await channel.delete()
+
+
+"""@chbomb.error
+async def chbomb_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")"""
+
+
+
+@bot.command()
+async def spmove(ctx, num_moves: int, user_id: int, channel: discord.VoiceChannel):
+    if num_moves > 100:
+        await ctx.send("Максимальное количество перемещений - 100.")
+        return
+    user = ctx.guild.get_member(user_id)
+    if user is None:
+        print("User not found.")
+        return
+    original_channel = user.voice.channel
+    for i in range(num_moves):
+        await user.move_to(channel)
+        await discord.utils.sleep_until(datetime.datetime.now() + datetime.timedelta(seconds=1))
+        await user.move_to(original_channel)
+        await discord.utils.sleep_until(datetime.datetime.now() + datetime.timedelta(seconds=1))
+    print(f"Moved {user.name} back and forth between {channel.name} and {original_channel.name} {num_moves} times.")
+    await ctx.send(f"Пользователь {user.name} был перемещен между {channel.name} и {original_channel.name} {num_moves} раз.")
+
+
+@bot.command()
+async def chngrpc(ctx, *, rpc_name: str):
+    activity = discord.Activity(name=rpc_name, type=discord.ActivityType.watching, details="Watching", state="Discord")
+    await bot.change_presence(activity=activity)
+    print(f"Changed Rich Presence to: {rpc_name}")
+    await ctx.send(f"Rich Presence был изменен на: {rpc_name}")
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def purge(ctx, limit: int):
+    if limit > 100:
+        await ctx.send("Максимальное количество перемещений - 100.")
+        return
+    deleted = await ctx.channel.purge(limit=limit+1)
+    await ctx.send(f"{len(deleted) - 1} сообщений было успешно удалено!")
     
-@bot.tree.command(name="dmbomb", description="Отправить сообщение в личку определенное количество раз.")
-async def dmbomb_func(interaction: discord.Interaction, times: int, user: discord.User, message: str):
-    await dmbomb(interaction, times, user, message)
+@purge.error
+async def purge_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("У вас недостаточно прав, чтобы выполнить эту команду.")
 
-@bot.tree.command(name="chbomb", description="Создать временный канал, где человек будет тегнут определенное количество раз.")
-async def chbomb_func(interaction: discord.Interaction, times: int, user: discord.User):
-    await chbomb(interaction, times, user)
-
-@bot.tree.command(name="spmove", description="Супер-перемещение между оригинальным и указанным каналом.")
-async def spmove_func(interaction: discord.Interaction, num_moves: int, user: discord.User, channel: discord.VoiceChannel):
-    await spmove(interaction, num_moves, user, channel)
-
-@bot.tree.command(name="purge",description="Удалить определенное количество сообщений в канале.")
-async def purge_func(interaction: discord.Interaction, messages: int, channel: discord.TextChannel):
-    await purge(interaction, messages, channel)
+@bot.command()
+async def id(ctx, user: Union[discord.Member, int]):
+    if isinstance(user, int):
+        try:
+            user = await bot.fetch_user(user)
+        except discord.NotFound:
+            return await ctx.send('Неверный ID пользователя.')
+    elif isinstance(user, discord.Member):
+        pass
+    else:
+        return await ctx.send('Неправильный ввод.')
+    
+    await ctx.send(f"ID пользователя {user.display_name} - {user.id}")
 
 # MUSIC FEATURES
 
