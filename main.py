@@ -1,7 +1,4 @@
-# python3 -c "import pytube as _; print(_.__path__)"
-# python3 -m pip install --force-reinstall https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
 import discord
-import datetime
 import asyncio
 import os
 import json
@@ -10,7 +7,6 @@ import math
 from discord import FFmpegPCMAudio
 from pytube import YouTube as YT
 from discord.ext import commands
-from discord.utils import get
 from config import APIToken
 from collections import deque
 from pytube import innertube
