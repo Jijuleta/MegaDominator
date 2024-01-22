@@ -20,5 +20,6 @@
     "songs_add": true,
     "stream": true,
     "show_settings": false,
-    "change_settings": false
+    "change_settings": false,
+    "send_message": false
 }

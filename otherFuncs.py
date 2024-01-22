@@ -1,4 +1,20 @@
-"""import discord
+import discord
+import json
+
+async def adminCheck(commandName: str, interaction: discord.Interaction):
+    with open("commands.json", "rb") as f:
+        commands = json.load(f)
+    if not commands[commandName] and not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
+        return
+
+async def send_message(interaction: discord.Interaction, channel:discord.TextChannel, message: str):
+    await adminCheck("send_message", interaction)
+    await interaction.response.send_message(content="Сообщение успешно отправлено.", ephemeral=True)
+    await channel.send(message)
+
+
+'''import discord
 
 async def help(interaction: discord.Interaction, version: str):
     embed = discord.Embed(title="Команды бота", color=0x00ff00)
@@ -26,4 +42,4 @@ async def help(interaction: discord.Interaction, version: str):
     embed.add_field(name=" ", value= " ", inline=False)
     embed.add_field(name="Автор замечательного бота:", value="**Jeyen**", inline=False)
     embed.add_field(name="VERSION:", value=version, inline=False)
-    await interaction.response.send_message(embed=embed, ephemeral=True)"""
+    await interaction.response.send_message(embed=embed, ephemeral=True)'''

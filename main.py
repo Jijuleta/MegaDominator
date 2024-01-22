@@ -17,6 +17,7 @@ from pytube import innertube
 
 from moderationFuncs import show_settings, change_settings, purge
 from trollFuncs import dmbomb, chbomb, spmove
+from otherFuncs import send_message
 
 innertube._cache_dir = os.path.join(os.getcwd(), "cache")
 innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
@@ -26,7 +27,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "3.1.1"
+Version = "3.1.2"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -44,6 +45,10 @@ async def adminCheck(commandName: str, interaction: discord.Interaction):
     if not commands[commandName] and not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
         return
+
+@bot.tree.command(name="message", description="Позволяет писать от имени бота.")
+async def send_message_func(interaction: discord.Interaction, channel:discord.TextChannel, message: str):
+    await send_message(interaction, channel, message)
 
 @bot.tree.command(name="showsettings", description="Показывает текущие настройки бота.")
 async def show_settings_func(interaction: discord.Interaction):
