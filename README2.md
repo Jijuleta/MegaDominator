@@ -1,1 +1,0 @@
-Для запуска контейнера: сначала забилдить, потом docker run -d --name megadominator megadominator
