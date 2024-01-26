@@ -14,7 +14,6 @@ RUN apt-get -y upgrade
 # Install pip requirements
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
-COPY cipher.py /usr/local/lib/python3.10/site-packages/pytube/cipher.py
 
 # Install ffmpeg
 RUN apt-get install -y ffmpeg
