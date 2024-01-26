@@ -23,7 +23,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "3.1.2"
+Version = "3.1.3"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -241,14 +241,14 @@ async def songs_upload_error(ctx, error):
 @bot.tree.command(name="download", description="Позволяет загрузить песню с Youtube.")
 async def download(interaction: discord.Interaction, url: str, title: str = ""):
     await adminCheck("download", interaction)
+    await interaction.response.send_message(content='Загрузка...', ephemeral=True)
     global song_dict
     try:
         video=YT(url, use_oauth=False, allow_oauth_cache=False)
         filtered=video.streams.filter(only_audio=True)
         if video.length > 600 or video.length < 1:
-            await interaction.response.send_message(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.', ephemeral=True)
+            await interaction.edit_original_response(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.')
             return
-        await interaction.response.send_message(content='Загрузка...', ephemeral=True)
         out_file = filtered[0].download('./media/')
         if os.path.isfile(out_file):
             base, ext = os.path.splitext(out_file)
@@ -257,8 +257,9 @@ async def download(interaction: discord.Interaction, url: str, title: str = ""):
             new_file = f'./media/{title}.mp3'
             os.rename(out_file, new_file)
             song_dict[title] = new_file
+            await interaction.edit_original_response(content='Файл был успешно загружен.')
         else:
-            await interaction.response.send_message(content='Ошибка: файл не был найден.', ephemeral=True)
+            await interaction.edit_original_response(content='Ошибка: файл не был найден.')
     except Exception as e:
         print(f"Error: {e}")
 
@@ -421,6 +422,8 @@ async def stream(interaction: discord.Interaction, url: str):
     if voice_client is None:
         voice_client = await voice_channel.connect()
 
+    await interaction.response.send_message(content='Работаю над воспроизведением...', ephemeral=True)
+
     try:
         video = YT(url, use_oauth=False, allow_oauth_cache=False)
         filtered = video.streams.filter(only_audio=True)
@@ -428,7 +431,7 @@ async def stream(interaction: discord.Interaction, url: str):
             await interaction.response.send_message(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.', ephemeral=True)
             return
 
-        await interaction.response.send_message(content='Проигрываю/Добавляю в очередь файл стрима.', ephemeral=True)
+        await interaction.edit_original_response(content='Проигрываю/Добавляю в очередь файл стрима.')
 
         out_file = filtered[0].download('./temp/')
 
@@ -443,6 +446,7 @@ async def stream(interaction: discord.Interaction, url: str):
 
                 audio_source = discord.FFmpegPCMAudio(out_file)
                 voice_client.play(audio_source)
+                await change_rpc(title)
 
                 while voice_client.is_playing():
                     await asyncio.sleep(1)
@@ -456,12 +460,14 @@ async def stream(interaction: discord.Interaction, url: str):
                     if next_file:
                         audio_source = discord.FFmpegPCMAudio(next_file)
                         voice_client.play(audio_source)
+                        await change_rpc(next_song)
                         while voice_client.is_playing():
                             await asyncio.sleep(1)
                         os.remove(next_file)
                         del song_dict[next_song]
 
                 await voice_client.disconnect()
+                await change_rpc(f'Version {Version}')
                 clean_temp_folder("./temp")
     except Exception as e:
         print(f"Error: {e}")
