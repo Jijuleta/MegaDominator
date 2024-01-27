@@ -428,7 +428,7 @@ async def stream(interaction: discord.Interaction, url: str):
         video = YT(url, use_oauth=False, allow_oauth_cache=False)
         filtered = video.streams.filter(only_audio=True)
         if video.length > 600 or video.length < 1:
-            await interaction.edit_original_response(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.', ephemeral=True)
+            await interaction.edit_original_response(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.')
             return
 
         await interaction.edit_original_response(content='Проигрываю/Добавляю в очередь файл стрима.')
