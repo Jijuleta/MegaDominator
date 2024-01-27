@@ -23,7 +23,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "3.1.3"
+Version = "3.1.3-R2"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -428,7 +428,7 @@ async def stream(interaction: discord.Interaction, url: str):
         video = YT(url, use_oauth=False, allow_oauth_cache=False)
         filtered = video.streams.filter(only_audio=True)
         if video.length > 600 or video.length < 1:
-            await interaction.response.send_message(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.', ephemeral=True)
+            await interaction.edit_original_response(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.', ephemeral=True)
             return
 
         await interaction.edit_original_response(content='Проигрываю/Добавляю в очередь файл стрима.')
