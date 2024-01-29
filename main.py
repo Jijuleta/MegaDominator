@@ -361,14 +361,14 @@ async def shuffle_playlist(interaction: discord.Interaction, name: str, loop: bo
         cur_playlist = playlists[name]
         await interaction.response.send_message(content="Проигрываю перемешанный плейлист: " + name, ephemeral=True)
         while True:
-            if loop:
-                random.shuffle(cur_playlist)
-            for song in cur_playlist:
-                source = FFmpegPCMAudio(f"./media/{song}.mp3")
-                voice_client.play(source)
-                await change_rpc(song)
-                while voice_client.is_playing():
-                    await asyncio.sleep(1)
+            random.shuffle(cur_playlist)
+            if loop or True:
+                for song in cur_playlist:
+                    source = FFmpegPCMAudio(f"./media/{song}.mp3")
+                    voice_client.play(source)
+                    await change_rpc(song)
+                    while voice_client.is_playing():
+                        await asyncio.sleep(1)
             if not loop:
                 break
         await change_rpc(f'Version {Version}')
