@@ -23,7 +23,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "3.1.3-R2"
+Version = "3.1.4"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
