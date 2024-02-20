@@ -7,13 +7,18 @@ import math
 from discord import FFmpegPCMAudio
 from pytube import YouTube as YT
 from discord.ext import commands
-from config import APIToken
 from collections import deque
 from pytube import innertube
 
 from moderationFuncs import show_settings, change_settings, purge
 from trollFuncs import dmbomb, chbomb, spmove
 from otherFuncs import send_message
+
+if not os.path.exists("config.py"):
+    APITokenFile = open("config.py", "x")
+    APITokenFile.write('APIToken = ""\nlogsChannelID = ""')
+else:
+    from config import APIToken
 
 innertube._cache_dir = os.path.join(os.getcwd(), "cache")
 innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
@@ -23,7 +28,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "3.1.4"
+Version = "3.1.5-TESTING"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -472,4 +477,7 @@ async def stream(interaction: discord.Interaction, url: str):
     except Exception as e:
         print(f"Error: {e}")
 
-bot.run(APIToken)
+try:
+    bot.run(APIToken)
+except NameError:
+    print("Enter APIToken in config.py")
