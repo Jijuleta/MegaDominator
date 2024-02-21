@@ -1,6 +1,5 @@
 import discord
 import json
-import os
 
 async def adminCheck(commandName: str, interaction: discord.Interaction):
     with open("commands.json", "rb") as f:
@@ -40,8 +39,7 @@ defaultCommandsPerms = {
     "send_message": False
 }
 
-'''import discord
-
+'''
 async def help(interaction: discord.Interaction, version: str):
     embed = discord.Embed(title="Команды бота", color=0x00ff00)
     embed.add_field(name="$settings", value="Позволяет настроить бота.",inline=False)
