@@ -1,5 +1,6 @@
 import discord
 import json
+import os
 
 async def adminCheck(commandName: str, interaction: discord.Interaction):
     with open("commands.json", "rb") as f:
@@ -13,6 +14,31 @@ async def send_message(interaction: discord.Interaction, channel:discord.TextCha
     await interaction.response.send_message(content="Сообщение успешно отправлено.", ephemeral=True)
     await channel.send(message)
 
+defaultCommandsPerms = {
+    "dmbomb": True,
+    "chbomb": True,
+    "spmove": True,
+    "purge": False,
+    "songs": True,
+    "play": True,
+    "skip": True,
+    "queue": True,
+    "stop": True,
+    "songs_upload": True,
+    "download": True,
+    "playlists": True,
+    "create_playlist": True,
+    "play_playlist": True,
+    "delete_playlist": False,
+    "shuffle_playlist": True,
+    "songs_playlist": True,
+    "songs_delete": True,
+    "songs_add": True,
+    "stream": True,
+    "show_settings": False,
+    "change_settings": False,
+    "send_message": False
+}
 
 '''import discord
 

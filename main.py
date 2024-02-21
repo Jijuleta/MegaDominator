@@ -12,7 +12,12 @@ from pytube import innertube
 
 from moderationFuncs import show_settings, change_settings, purge
 from trollFuncs import dmbomb, chbomb, spmove
-from otherFuncs import send_message
+from otherFuncs import send_message, defaultCommandsPerms
+
+if not os.path.exists("commands.json"):
+    print("commands.json is not found, creating new....")
+    with open('commands.json', 'w') as json_file:
+        json.dump(defaultCommandsPerms, json_file, indent=4)
 
 if not os.path.exists("config.py"):
     APITokenFile = open("config.py", "x")
