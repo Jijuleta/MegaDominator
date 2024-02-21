@@ -31,7 +31,7 @@ async def change_settings(interaction: discord.Interaction, command_name: str, s
         await interaction.response.send_message(content=f"Команда '{command_name}' не найдена.", ephemeral=True)
 
 async def purge(interaction: discord.Interaction, messages: int, channel: discord.TextChannel):
-    adminCheck("purge")
+    await adminCheck("purge", interaction)
     if messages <= 0:
         await interaction.response.send_message(content="Количество сообщений для удаления не может быть 0 или отрицательным.", ephemeral=True)
         return

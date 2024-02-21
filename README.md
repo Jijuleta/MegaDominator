@@ -2,10 +2,6 @@
 
 Это самый добрый бот для Discord, который ТОЧНО не создан для буллинга людей.
 
-# ПЕРВОЕ ВКЛЮЧЕНИЕ:
-- Для того, чтобы бот запускался, нужно создать файл с названием config.py, в котором будет содержаться переменная APIToken.
-**(ПРИМЕР:  APIToken = "ТОКЕН БОТА")**
-
 # ИСПОЛЬЗОВАНИЕ БОТА:
 - Для корректной работы бота, нужно включить PRESENCE INTENT, SERVER MEMBERS INTENT, MESSAGE CONTENT INTENT в настройках Bot(https://discord.com/developers/applications).
 
@@ -19,9 +15,9 @@
 Инструкция по установке:
 - https://www.hostinger.com/tutorials/how-to-install-ffmpeg
 
-Для Docker используйте:
+Для установки FFmpeg в Docker используйте:
 - RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg
 
-**Бот воспринимает только MP3/MP4 файлы.**
+**Бот гарантированно воспринимает MP3/MP4 файлы.**
 
 

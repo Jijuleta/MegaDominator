@@ -7,13 +7,26 @@ import math
 from discord import FFmpegPCMAudio
 from pytube import YouTube as YT
 from discord.ext import commands
-from config import APIToken
 from collections import deque
 from pytube import innertube
 
 from moderationFuncs import show_settings, change_settings, purge
 from trollFuncs import dmbomb, chbomb, spmove
-from otherFuncs import send_message
+from otherFuncs import send_message, defaultCommandsPerms
+
+if not os.path.exists("commands.json"):
+    print("commands.json is not found, creating new....")
+    with open('commands.json', 'w') as json_file:
+        json.dump(defaultCommandsPerms, json_file, indent=4)
+
+if not os.path.exists("config.py"):
+    APITokenFile = open("config.py", "x")
+    APITokenFile.write('APIToken = ""\nlogsChannelID = 12345')
+else:
+    from config import APIToken, logsChannelID
+    if logsChannelID == 12345:
+        print("Enter logsChannelID in config.py file")
+
 
 innertube._cache_dir = os.path.join(os.getcwd(), "cache")
 innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
@@ -23,7 +36,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "3.1.4"
+Version = "3.2.0"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -34,41 +47,63 @@ async def on_ready():
     print(f'Synced {len(sync)} command')
     activity = discord.Activity(name=f'Version {Version}', type=discord.ActivityType.watching, details="Watching", state="Discord")
     await bot.change_presence(activity=activity)
+    try:
+        logsChannel = bot.get_channel(logsChannelID)
+        await logsChannel.send(f'Бот был включён на версии {Version}')
+    except AttributeError:
+        print('Enter correct logsChannelID in config.py file')
+
 
 async def adminCheck(commandName: str, interaction: discord.Interaction):
     with open("commands.json", "rb") as f:
         commands = json.load(f)
     if not commands[commandName] and not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(content="Эта команда недоступна для всех пользователей.", ephemeral=True)
+        logsChannel = bot.get_channel(logsChannelID)
+        await logsChannel.send(f'Пользователь {interaction.user.mention} попытался воспользоваться командой {commandName}, которая недоступна для него')
         return
 
 @bot.tree.command(name="message", description="Позволяет писать от имени бота.")
 async def send_message_func(interaction: discord.Interaction, channel:discord.TextChannel, message: str):
     await send_message(interaction, channel, message)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду message на канал <#{channel.id}>, написав "{message}"')
 
 @bot.tree.command(name="showsettings", description="Показывает текущие настройки бота.")
 async def show_settings_func(interaction: discord.Interaction):
     await show_settings(interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь "{interaction.user.mention}" использовал команду show_settings')
 
 @bot.tree.command(name="changesettings", description="Позволяет изменить настройки бота.")
 async def change_settings_func(interaction: discord.Interaction, command_name: str, state: bool):
     await change_settings(interaction, command_name, state)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь "{interaction.user.mention}" использовал команду change_settings')
     
 @bot.tree.command(name="dmbomb", description="Отправить сообщение в личку определенное количество раз.")
 async def dmbomb_func(interaction: discord.Interaction, times: int, user: discord.User, message: str):
     await dmbomb(interaction, times, user, message)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду dmbomb на {user.mention} {times} раз, написав "{message}"')
 
 @bot.tree.command(name="chbomb", description="Создать временный канал, где человек будет тегнут определенное количество раз.")
 async def chbomb_func(interaction: discord.Interaction, times: int, user: discord.User):
     await chbomb(interaction, times, user)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду chbomb на {user.mention} {times} раз')
 
 @bot.tree.command(name="spmove", description="Супер-перемещение между оригинальным и указанным каналом.")
 async def spmove_func(interaction: discord.Interaction, num_moves: int, user: discord.User, channel: discord.VoiceChannel):
     await spmove(interaction, num_moves, user, channel)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду spmove на {user.mention} {num_moves} раз в канал {channel.mention}')
 
 @bot.tree.command(name="purge",description="Удалить определенное количество сообщений в канале.")
 async def purge_func(interaction: discord.Interaction, messages: int, channel: discord.TextChannel):
     await purge(interaction, messages, channel)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду purge, удалив {messages} сообщений в канале {channel.mention}')
 
 # MUSIC FEATURES
 
@@ -128,6 +163,8 @@ async def show_list(interaction: discord.Interaction, page: int, s_list, header:
 @bot.tree.command(name="songs", description="Выводит список доступных песен.")
 async def songs(interaction: discord.Interaction, page: int = 1):
     await adminCheck("songs", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду songs')
     if not audio_files:
         await interaction.send("Нет доступных песен")
     else:
@@ -148,6 +185,8 @@ async def songs_play(voice_client):
 @bot.tree.command(name="play", description="Воспроизводит выбранную песню.")
 async def play(interaction: discord.Interaction, song_title: str):
     await adminCheck("play", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду play, включив песню "{song_title}"')
     voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
     if not voice_client:
         voice_channel = interaction.user.voice.channel
@@ -167,6 +206,8 @@ async def play(interaction: discord.Interaction, song_title: str):
 @bot.tree.command(name="skip", description="Пропускает текущую песню.")
 async def skip(interaction: discord.Interaction):
     await adminCheck("skip", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду skip')
     voice_channel = interaction.user.voice.channel
     voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
     if voice_client and voice_client.is_playing():
@@ -179,6 +220,8 @@ async def skip(interaction: discord.Interaction):
 @bot.tree.command(name="queue", description="Показывает очередь песен.")
 async def queue(interaction: discord.Interaction, page: int = 1):
     await adminCheck("queue", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду queue')
     if len(song_queue) == 0:
         await interaction.response.send_message(content='Очередь пуста.',ephemeral=True)
     else:
@@ -188,6 +231,8 @@ async def queue(interaction: discord.Interaction, page: int = 1):
 @bot.tree.command(name="stop", description="Останавливает музыку.")
 async def stop(interaction: discord.Interaction):
     await adminCheck("stop", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду stop')
     voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
     if voice_client:
         if voice_client.is_playing():
@@ -206,6 +251,8 @@ async def songsupload(interaction:discord.Interaction):
 @bot.command()
 async def songs_upload(ctx, *, file_name: str):
     await adminCheck("songs_upload")
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {ctx.user.mention} использовал команду songs_upload, назвав песню "{file_name}"')
     artist_title = file_name.strip('"')
 
     if len(file_name) > 100:
@@ -241,6 +288,8 @@ async def songs_upload_error(ctx, error):
 @bot.tree.command(name="download", description="Позволяет загрузить песню с Youtube.")
 async def download(interaction: discord.Interaction, url: str, title: str = ""):
     await adminCheck("download", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду download с URL {url} и названием "{title}"')
     await interaction.response.send_message(content='Загрузка...', ephemeral=True)
     global song_dict
     try:
@@ -298,6 +347,8 @@ def save_playlists(playlists):
 @bot.tree.command(name="playlists", description="Показывает доступные плейлисты.")
 async def playlists(interaction: discord.Interaction, page: int = 1):
     await adminCheck("playlists", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду playlists')
     playlists = load_playlists()
     if not playlists:
         await interaction.response.send_message(content="Нет доступных плейлистов.", ephemeral=True)
@@ -308,6 +359,8 @@ async def playlists(interaction: discord.Interaction, page: int = 1):
 @bot.tree.command(name="create_playlist", description="Создает новый плейлист.")
 async def create_playlist(interaction: discord.Interaction, name: str):
     await adminCheck("create_playlist", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду create_playlist с названием "{name}"')
     playlists = load_playlists()
     if name in playlists:
         await interaction.response.send_message(content="Плейлист с этим именем уже существует.", ephemeral=True)
@@ -320,6 +373,8 @@ async def create_playlist(interaction: discord.Interaction, name: str):
 @bot.tree.command(name="play_playlist", description="Воспроизводит плейлист.")
 async def play_playlist(interaction: discord.Interaction, name: str, loop: bool = False):
     await adminCheck("play_playlist", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду play_playlist, включив плейлист "{name}"')
     playlists = load_playlists()
     if name not in playlists:
         await interaction.response.send_message(content="Плейлиста с таким именем не существует.", ephemeral=True)
@@ -343,6 +398,8 @@ async def play_playlist(interaction: discord.Interaction, name: str, loop: bool 
 @bot.tree.command(name="delete_playlist", description="Удаляет плейлист.")
 async def delete_playlist(interaction: discord.Interaction, name: str):
     await adminCheck("delete_playlist", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду delete_playlist, удалив плейлист "{name}"')
     playlists = load_playlists()
     if name in playlists:
         del playlists[name]
@@ -354,6 +411,8 @@ async def delete_playlist(interaction: discord.Interaction, name: str):
 @bot.tree.command(name="shuffle_playlist", description="Воспроизводит перемешанный плейлист.")
 async def shuffle_playlist(interaction: discord.Interaction, name: str, loop: bool = False):
     await adminCheck("shuffle_playlist", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду shuffle_playlist, включив плейлист "{name}"')
     playlists = load_playlists()
     if name in playlists:
         voice_channel = interaction.user.voice.channel
@@ -379,6 +438,8 @@ async def shuffle_playlist(interaction: discord.Interaction, name: str, loop: bo
 @bot.tree.command(name="songs_playlist", description="Выводит список песен в плейлисте.")
 async def songs_playlist(interaction: discord.Interaction, name: str, page: int = 1):
     await adminCheck("songs_playlist", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду songs_playlist')
     playlists = load_playlists()
     if name in playlists:
         await show_list(interaction, page, playlists[name], f'Песни в плейлисте {name}:')
@@ -388,6 +449,8 @@ async def songs_playlist(interaction: discord.Interaction, name: str, page: int 
 @bot.tree.command(name="songs_delete", description="Удаляет определенную песню из плейлиста.")
 async def songs_delete(interaction: discord.Interaction, name: str, song: str):
     await adminCheck("songs_delete", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду songs_delete, удалив песню "{song}" из плейлиста "{name}"')
     playlists = load_playlists()
     if name in playlists:
         if song in playlists[name]:
@@ -402,6 +465,8 @@ async def songs_delete(interaction: discord.Interaction, name: str, song: str):
 @bot.tree.command(name="songs_add", description="Добавляет определенную песню в плейлист.")
 async def songs_add(interaction: discord.Interaction, name: str, song: str):
     await adminCheck("songs_add", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду songs_add, добавив песню "{song}" в плейлист "{name}"')
     playlists = load_playlists()
     if name in playlists:
         if song not in playlists[name]:
@@ -416,6 +481,8 @@ async def songs_add(interaction: discord.Interaction, name: str, song: str):
 @bot.tree.command(name="stream", description="Временно скачивает и проигрывает песню с Youtube. (Поддеживает очередь)")
 async def stream(interaction: discord.Interaction, url: str):
     await adminCheck("stream", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду stream, проиграв песню с URL {url}')
     voice_channel = interaction.user.voice.channel
     voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
 
@@ -472,4 +539,7 @@ async def stream(interaction: discord.Interaction, url: str):
     except Exception as e:
         print(f"Error: {e}")
 
-bot.run(APIToken)
+try:
+    bot.run(APIToken)
+except NameError:
+    print("Enter APIToken in config.py")
