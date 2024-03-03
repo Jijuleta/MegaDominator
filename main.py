@@ -36,7 +36,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "3.2.0"
+Version = "3.2.1"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -83,27 +83,28 @@ async def change_settings_func(interaction: discord.Interaction, command_name: s
     
 @bot.tree.command(name="dmbomb", description="Отправить сообщение в личку определенное количество раз.")
 async def dmbomb_func(interaction: discord.Interaction, times: int, user: discord.User, message: str):
-    await dmbomb(interaction, times, user, message)
     logsChannel = bot.get_channel(logsChannelID)
     await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду dmbomb на {user.mention} {times} раз, написав "{message}"')
+    await dmbomb(interaction, times, user, message)
 
 @bot.tree.command(name="chbomb", description="Создать временный канал, где человек будет тегнут определенное количество раз.")
 async def chbomb_func(interaction: discord.Interaction, times: int, user: discord.User):
-    await chbomb(interaction, times, user)
     logsChannel = bot.get_channel(logsChannelID)
     await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду chbomb на {user.mention} {times} раз')
+    await chbomb(interaction, times, user)
 
 @bot.tree.command(name="spmove", description="Супер-перемещение между оригинальным и указанным каналом.")
 async def spmove_func(interaction: discord.Interaction, num_moves: int, user: discord.User, channel: discord.VoiceChannel):
-    await spmove(interaction, num_moves, user, channel)
     logsChannel = bot.get_channel(logsChannelID)
     await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду spmove на {user.mention} {num_moves} раз в канал {channel.mention}')
+    await spmove(interaction, num_moves, user, channel)
 
 @bot.tree.command(name="purge",description="Удалить определенное количество сообщений в канале.")
 async def purge_func(interaction: discord.Interaction, messages: int, channel: discord.TextChannel):
-    await purge(interaction, messages, channel)
     logsChannel = bot.get_channel(logsChannelID)
     await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду purge, удалив {messages} сообщений в канале {channel.mention}')
+    await purge(interaction, messages, channel)
+
 
 # MUSIC FEATURES
 
