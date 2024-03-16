@@ -177,13 +177,27 @@ async def search(interaction: discord.Interaction, song_name: str):
     await adminCheck("search", interaction)
     logsChannel = bot.get_channel(logsChannelID)
     await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду search, пытаясь найти песню {song_name}')
-    audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3' or '.mp4'))]
-    if audio_files == []:
+    audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3', '.mp4'))]
+    audio_files_lower = [file.lower() for file in audio_files]
+    
+    if not audio_files:
         await interaction.response.send_message(f"Песни не были обнаружены", ephemeral=True)
     else:
         await interaction.response.send_message(f"Работаю над поиском песни...", ephemeral=True)
-        matches = difflib.get_close_matches(song_name, audio_files)
-        await interaction.edit_original_response(content=f'Совпадения с введённой песней: {matches}')
+        song_keywords = set(song_name.lower().split())
+        matches = []
+        for file, keywords in zip(audio_files, audio_files_lower):
+            if any(keyword in keywords for keyword in song_keywords):
+                matches.append(file)
+        original_matches = matches[:3]
+        formatted_matches = [match.split('.')[0] for match in original_matches]
+        if not formatted_matches:
+            await interaction.edit_original_response(content="Не найдено совпадений. (Попробуйте использовать другие ключевые слова)")
+        else:
+            embed = discord.Embed(title="Результаты поиска", color=0x00ff00)
+            value = "\n".join(formatted_matches)
+            embed.description = value
+            await interaction.edit_original_response(embed=embed)
 
 async def songs_play(voice_client):
     while len(song_queue) > 0:
