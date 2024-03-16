@@ -11,7 +11,7 @@ async def adminCheck(commandName: str, interaction: discord.Interaction):
 async def show_settings(interaction: discord.Interaction):
     await adminCheck("show_settings", interaction)  
     output_message = "Доступные команды:\n"
-    emojis = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹", "🇺", "🇻", "🇼"]
+    emojis = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹", "🇺", "🇻", "🇼", "🇽"]
     with open("commands.json", "r") as f:
         commands = json.load(f)
     for i, (command, admin_only) in enumerate(commands.items(), start=1):
