@@ -4,6 +4,7 @@ import os
 import json
 import random
 import math
+import difflib
 from discord import FFmpegPCMAudio
 from pytube import YouTube as YT
 from discord.ext import commands
@@ -36,7 +37,7 @@ intents.members = True
 intents.message_content = True
 
 
-Version = "3.2.1"
+Version = "3.2.2-TESTING"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -131,7 +132,7 @@ def clean_temp_folder(folder_path):
 clean_temp_folder("./temp")
 
 MUSIC_LIBRARY_PATH = './media/'
-audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3'))]
+audio_files = [file for file in os.listdir('./media') if file.lower().endswith('.mp3' or 'mp4')]
 
 async def change_rpc(activityname: str):
     act = discord.Activity(name=activityname, type=discord.ActivityType.watching, details="Watching", state="Discord")
@@ -170,6 +171,19 @@ async def songs(interaction: discord.Interaction, page: int = 1):
         await interaction.send("Нет доступных песен")
     else:
         await show_list(interaction, page, audio_files, 'Доступные песни:')
+
+@bot.tree.command(name="search", description="Позволяет искать песню по названию")
+async def search(interaction: discord.Interaction, song_name: str):
+    await adminCheck("search", interaction)
+    logsChannel = bot.get_channel(logsChannelID)
+    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду search, пытаясь найти песню {song_name}')
+    audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3' or '.mp4'))]
+    if audio_files == []:
+        await interaction.response.send_message(f"Песни не были обнаружены", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"Работаю над поиском песни...", ephemeral=True)
+        matches = difflib.get_close_matches(song_name, audio_files)
+        await interaction.edit_original_response(content=f'Совпадения с введённой песней: {matches}')
 
 async def songs_play(voice_client):
     while len(song_queue) > 0:

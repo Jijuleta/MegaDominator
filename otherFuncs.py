@@ -36,7 +36,8 @@ defaultCommandsPerms = {
     "stream": True,
     "show_settings": False,
     "change_settings": False,
-    "send_message": False
+    "send_message": False,
+    "search": True
 }
 
 '''
