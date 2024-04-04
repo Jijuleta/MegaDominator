@@ -4,7 +4,6 @@ import os
 import json
 import random
 import math
-import difflib
 from discord import FFmpegPCMAudio
 from pytube import YouTube as YT
 from discord.ext import commands
@@ -22,7 +21,7 @@ if not os.path.exists("commands.json"):
 
 if not os.path.exists("config.py"):
     APITokenFile = open("config.py", "x")
-    APITokenFile.write('APIToken = ""\nlogsChannelID = 12345')
+    APITokenFile.write('APIToken = ""\nlogsChannelID = 12345''')
 else:
     from config import APIToken, logsChannelID
     if logsChannelID == 12345:
@@ -36,8 +35,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-
-Version = "3.2.2"
+Version = "3.2.3"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event
@@ -53,7 +51,6 @@ async def on_ready():
         await logsChannel.send(f'Бот был включён на версии {Version}')
     except AttributeError:
         print('Enter correct logsChannelID in config.py file')
-
 
 async def adminCheck(commandName: str, interaction: discord.Interaction):
     with open("commands.json", "rb") as f:
@@ -132,7 +129,7 @@ def clean_temp_folder(folder_path):
 clean_temp_folder("./temp")
 
 MUSIC_LIBRARY_PATH = './media/'
-audio_files = [file for file in os.listdir('./media') if file.lower().endswith('.mp3' or 'mp4')]
+audio_files = [file for file in os.listdir('./media') if file.lower().endswith('.mp3')]
 
 async def change_rpc(activityname: str):
     act = discord.Activity(name=activityname, type=discord.ActivityType.watching, details="Watching", state="Discord")
@@ -177,7 +174,7 @@ async def search(interaction: discord.Interaction, song_name: str):
     await adminCheck("search", interaction)
     logsChannel = bot.get_channel(logsChannelID)
     await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду search, пытаясь найти песню {song_name}')
-    audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3', '.mp4'))]
+    audio_files = [file for file in os.listdir('./media') if file.endswith(('.mp3'))]
     audio_files_lower = [file.lower() for file in audio_files]
     
     if not audio_files:
@@ -189,6 +186,7 @@ async def search(interaction: discord.Interaction, song_name: str):
         for file, keywords in zip(audio_files, audio_files_lower):
             if any(keyword in keywords for keyword in song_keywords):
                 matches.append(file)
+        global formatted_matches
         original_matches = matches[:3]
         formatted_matches = [match.split('.')[0] for match in original_matches]
         if not formatted_matches:
@@ -197,7 +195,46 @@ async def search(interaction: discord.Interaction, song_name: str):
             embed = discord.Embed(title="Результаты поиска", color=0x00ff00)
             value = "\n".join(formatted_matches)
             embed.description = value
-            await interaction.edit_original_response(embed=embed)
+            button = searchButtons()
+            await interaction.edit_original_response(embed=embed, view=button)
+            await button.wait()
+            if button.selection != None:
+                async def searchPlay(interaction, song_title):
+                    await adminCheck("play", interaction)
+                    logsChannel = bot.get_channel(logsChannelID)
+                    await logsChannel.send(f'Пользователь {interaction.user.mention} использовал команду play через search, включив песню "{song_title}"')
+                    voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
+                    if not voice_client:
+                     voice_channel = interaction.user.voice.channel
+                     voice_client = await voice_channel.connect()
+                    song_path = song_dict.get(song_title)
+                    if song_path:
+                        song_queue.append(song_title)
+                        if not voice_client.is_playing():
+                            await songs_play(voice_client)
+                await searchPlay(interaction, song_title = formatted_matches[button.selection])
+            else:
+                return
+
+class searchButtons(discord.ui.View):
+    def __init__(self, *, timeout=180):
+        super().__init__(timeout=timeout)
+        self.selection = None
+    @discord.ui.button(emoji='1️⃣',style=discord.ButtonStyle.green)
+    async def firstButton(self, interaction:discord.Interaction, button:discord.ui.Button,):
+        self.selection = 0
+        await interaction.response.edit_message(content=f"Включаю песню {formatted_matches[self.selection]}",view=self)
+        self.stop()
+    @discord.ui.button(emoji='2️⃣',style=discord.ButtonStyle.green)
+    async def secondButton(self, interaction:discord.Interaction, button:discord.ui.Button,):
+        self.selection = 1
+        await interaction.response.edit_message(content=f"Включаю песню {formatted_matches[self.selection]}",view=self)
+        self.stop()
+    @discord.ui.button(emoji='3️⃣',style=discord.ButtonStyle.green)
+    async def thirdButton(self, interaction:discord.Interaction, button:discord.ui.Button,):
+        self.selection = 2
+        await interaction.response.edit_message(content=f"Включаю песню {formatted_matches[self.selection]}",view=self)
+        self.stop()
 
 async def songs_play(voice_client):
     while len(song_queue) > 0:
@@ -324,8 +361,8 @@ async def download(interaction: discord.Interaction, url: str, title: str = ""):
     try:
         video=YT(url, use_oauth=False, allow_oauth_cache=False)
         filtered=video.streams.filter(only_audio=True)
-        if video.length > 600 or video.length < 1:
-            await interaction.edit_original_response(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.')
+        if video.length > 36000 or video.length < 1:
+            await interaction.edit_original_response(content=f'Ошибка: файл длиннее 10 часов.')
             return
         out_file = filtered[0].download('./media/')
         if os.path.isfile(out_file):
@@ -523,8 +560,8 @@ async def stream(interaction: discord.Interaction, url: str):
     try:
         video = YT(url, use_oauth=False, allow_oauth_cache=False)
         filtered = video.streams.filter(only_audio=True)
-        if video.length > 600 or video.length < 1:
-            await interaction.edit_original_response(content=f'Ошибка: файл длиннее 10 минут. Длительность файла - {video.length//60}/10 минут.')
+        if video.length > 36000 or video.length < 1:
+            await interaction.edit_original_response(content=f'Ошибка: файл длиннее 10 часов.')
             return
 
         await interaction.edit_original_response(content='Проигрываю/Добавляю в очередь файл стрима.')

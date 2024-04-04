@@ -18,6 +18,6 @@
 Для установки FFmpeg в Docker используйте:
 - RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg
 
-**Бот гарантированно воспринимает MP3/MP4 файлы.**
+**Бот гарантированно воспринимает только MP3 файлы.**
 
 
