@@ -212,7 +212,10 @@ async def search(interaction: discord.Interaction, song_name: str):
                         song_queue.append(song_title)
                         if not voice_client.is_playing():
                             await songs_play(voice_client)
-                await searchPlay(interaction, song_title = formatted_matches[button.selection])
+                try:
+                    await searchPlay(interaction, song_title = formatted_matches[button.selection])
+                except IndexError:
+                    await interaction.response.edit_message(content=f"Песня не найдена.")
             else:
                 return
 
@@ -228,12 +231,18 @@ class searchButtons(discord.ui.View):
     @discord.ui.button(emoji='2️⃣',style=discord.ButtonStyle.green)
     async def secondButton(self, interaction:discord.Interaction, button:discord.ui.Button,):
         self.selection = 1
-        await interaction.response.edit_message(content=f"Включаю песню {formatted_matches[self.selection]}",view=self)
+        try:
+            await interaction.response.edit_message(content=f"Включаю песню {formatted_matches[self.selection]}",view=self)
+        except IndexError:
+            await interaction.response.edit_message(content=f"Песня не найдена.")
         self.stop()
     @discord.ui.button(emoji='3️⃣',style=discord.ButtonStyle.green)
     async def thirdButton(self, interaction:discord.Interaction, button:discord.ui.Button,):
         self.selection = 2
-        await interaction.response.edit_message(content=f"Включаю песню {formatted_matches[self.selection]}",view=self)
+        try:
+            await interaction.response.edit_message(content=f"Включаю песню {formatted_matches[self.selection]}",view=self)
+        except IndexError:
+            await interaction.response.edit_message(content=f"Песня не найдена.")
         self.stop()
 
 async def songs_play(voice_client):
