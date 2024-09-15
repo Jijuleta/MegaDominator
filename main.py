@@ -5,10 +5,9 @@ import json
 import random
 import math
 from discord import FFmpegPCMAudio
-from pytube import YouTube as YT
+from pytubefix import YouTube as YT
 from discord.ext import commands
 from collections import deque
-from pytube import innertube
 
 from moderationFuncs import show_settings, change_settings, purge
 from trollFuncs import dmbomb, chbomb, spmove
@@ -27,15 +26,11 @@ else:
     if logsChannelID == 12345:
         print("Enter logsChannelID in config.py file")
 
-
-innertube._cache_dir = os.path.join(os.getcwd(), "cache")
-innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
-
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-Version = "3.2.3"
+Version = "3.2.4"
 bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
 
 @bot.event

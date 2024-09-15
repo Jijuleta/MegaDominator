@@ -4,6 +4,7 @@ __pycache__/
 media/
 temp/
 playlists.json
+commands.json
 .dockerignore
 Dockerfile
 .vscode/
