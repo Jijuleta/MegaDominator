@@ -18,7 +18,14 @@
 # ИСПОЛЬЗОВАНИЕ DOCKER & COMPOSE:
 ```
 git clone https://github.com/Jijuleta/MegaDominator.git
+```
+```
+cd MegaDominator
+```
+```
 docker-compose build
+```
+```
 docker-compose up
 ```
 
