@@ -5,5 +5,6 @@ services:
     volumes:
       - ./media:/app/media
       - ./playlists.json:/app/playlists.json
+      - ./commands.json:/app/commands.json
     working_dir: /app
     command: bash -c "source venv/bin/activate && python main.py"
