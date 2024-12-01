@@ -16,9 +16,11 @@
 - https://www.hostinger.com/tutorials/how-to-install-ffmpeg
 
 # ИСПОЛЬЗОВАНИЕ DOCKER & COMPOSE:
-- git clone https://github.com/Jijuleta/MegaDominator.git
-- docker-compose build
-- docker-compose up
+```
+git clone https://github.com/Jijuleta/MegaDominator.git
+docker-compose build
+docker-compose up
+```
 
 # ДРУГОЕ
 **Бот гарантированно воспринимает только MP3 файлы.**
