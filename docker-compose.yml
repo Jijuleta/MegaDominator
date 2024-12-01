@@ -1,0 +1,9 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    volumes:
+      - ./media:/app/media
+      - ./playlists.json:/app/playlists.json
+    working_dir: /app
+    command: bash -c "source venv/bin/activate && python main.py"
