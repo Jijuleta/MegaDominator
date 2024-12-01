@@ -4,6 +4,7 @@
 
 # ИСПОЛЬЗОВАНИЕ БОТА:
 - Для корректной работы бота, нужно включить PRESENCE INTENT, SERVER MEMBERS INTENT, MESSAGE CONTENT INTENT в настройках Bot(https://discord.com/developers/applications).
+- Не забудьте ввести APIToken и logsChannelID в файл config.py
 
 # ИСПОЛЬЗОВАНИЕ МУЗЫКАЛЬНЫХ КОМАНД:
 Музыкальные команды работают ТОЛЬКО при установленном FFmpeg.
