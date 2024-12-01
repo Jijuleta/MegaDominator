@@ -15,9 +15,12 @@
 Инструкция по установке:
 - https://www.hostinger.com/tutorials/how-to-install-ffmpeg
 
-Для установки FFmpeg в Docker используйте:
-- RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg
+# ИСПОЛЬЗОВАНИЕ DOCKER & COMPOSE:
+- git clone https://github.com/Jijuleta/MegaDominator.git
+- docker-compose build
+- docker-compose up
 
+# ДРУГОЕ
 **Бот гарантированно воспринимает только MP3 файлы.**
 
 
